@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 99)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake-build-debug/sdl2)
 
-add_executable(eletjatek main.c)
+add_executable(eletjatek main.c megjelenites.c megjelenites.h jateklogika.c jateklogika.h)
 
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
