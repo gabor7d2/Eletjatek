@@ -3,6 +3,8 @@
 
 #include "typedefs.h"
 
+void clear_cells(GameField *field);
+
 GameField* create_field(short sizeX, short sizeY);
 
 void free_field(GameField *field);

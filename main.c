@@ -1,8 +1,5 @@
 #include <stdbool.h>
 #include <SDL.h>
-#include <SDL2_gfxPrimitives.h>
-#include <math.h>
-#include <time.h>
 
 #include "debugmalloc.h"
 #include "display.h"
@@ -10,12 +7,7 @@
 
 // SDL kezeléséhez használt dokumentáció: https://infoc.eet.bme.hu/sdl/
 
-// félkész dokumentáció
-// modulok
-// menü nélkül?
-// debugmalloc.h?
-
-Uint32 timer_tick(Uint32 ms, void *param) {
+Uint32 render_tick(Uint32 ms, void *param) {
     SDL_Event ev;
     ev.type = SDL_USEREVENT;
     SDL_PushEvent(&ev);
@@ -25,22 +17,20 @@ Uint32 timer_tick(Uint32 ms, void *param) {
 int main(int argc, char *argv[]) {
     short WIDTH = 1000;
     short HEIGHT = 1000;
-    short cellsX = 50;
-    short cellsY = cellsX;
+    short cellsX = 20;
+    short cellsY = 20;
 
     SDL_Window *window;
     SDL_Renderer *renderer;
     sdl_init(WIDTH, HEIGHT, "Game Of Life", &window, &renderer);
 
-    SDL_Color *deadColor = create_color(145, 105, 35, 255);
-    SDL_Color *liveColor = create_color(255, 162, 0, 255);
-    SDL_Color *borderColor = create_color(100, 100, 100, 255);
-    SDL_Color *bgColor = create_color(0, 0, 0, 255);
-    GridParams *gridParams = create_grid_params(WIDTH, HEIGHT, cellsX, cellsY, 10, deadColor, liveColor, borderColor, bgColor);
-
+    GridParams *gridParams = create_grid_params(WIDTH, HEIGHT, cellsX, cellsY, 10, 0x212121ff, 0xffb300ff, 0x424242ff, 0xfff176ff);
     GameField* gameField = create_field(cellsX, cellsY);
 
-    SDL_TimerID id = SDL_AddTimer(20, timer_tick, NULL);
+    if (SDL_AddTimer(20, render_tick, NULL) == 0) {
+        SDL_Log("Couldn't start render timer: %s", SDL_GetError());
+        exit(2);
+    }
 
     bool render_needed = true;
     bool sim_running = false;
@@ -76,7 +66,6 @@ int main(int argc, char *argv[]) {
                 }
                 break;
             case SDL_MOUSEMOTION:
-                // TODO increase polling rate/drawing speed
                 if (drawing) {
                     change_cell(gameField, gridParams, prevPosX, prevPosY, drawMode);
                     render_needed = true;
@@ -85,11 +74,18 @@ int main(int argc, char *argv[]) {
                 }
                 break;
             case SDL_KEYDOWN:
-
+                switch (event.key.keysym.sym) {
+                    case SDLK_c:
+                        if (!sim_running && !drawing) {
+                            clear_cells(gameField);
+                            render_needed = true;
+                        }
+                        break;
+                }
                 break;
             case SDL_USEREVENT:
                 if (render_needed) {
-                    clear_background(renderer, WIDTH, HEIGHT, bgColor);
+                    clear_background(renderer, WIDTH, HEIGHT, gridParams->bgColor);
                     draw_cells(renderer, gridParams, gameField);
                     draw_grid(renderer, gridParams);
                     SDL_RenderPresent(renderer);

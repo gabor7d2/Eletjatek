@@ -2,6 +2,19 @@
 #include "gamelogic.h"
 
 /**
+ * A játéktér összes celláját halottra állítja.
+ * @param field A játéktér.
+ */
+void clear_cells(GameField *field) {
+    if (field == NULL) return;
+    for (int x = 0; x < field->sizeX; ++x) {
+        for (int y = 0; y < field->sizeY; ++y) {
+            field->cells[y][x] = DEAD;
+        }
+    }
+}
+
+/**
  * Létrehoz egy megadott méretű játékteret.
  * @param sizeX A játéktér hány cella széles legyen.
  * @param sizeY A játéktér hány cella magas legyen.
@@ -28,14 +41,9 @@ GameField* create_field(short sizeX, short sizeY) {
         cells[i] = cells[0] + i * sizeX;
     }
 
-    // Feltöltés alapállapottal
-    for (int x = 0; x < sizeX; ++x) {
-        for (int y = 0; y < sizeY; ++y) {
-            cells[y][x] = DEAD;
-        }
-    }
-
     field->cells = cells;
+    // Feltöltés alapállapottal
+    clear_cells(field);
     return field;
 }
 

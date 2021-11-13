@@ -5,7 +5,7 @@
 #include "display.h"
 
 /**
- * Inicializálja az SDL-t és létrehoz egy ablakot és a renderert
+ * Inicializálja az SDL-t és létrehozza a renderert és egy ablakot.
  * @param width Ablak szélessége (pixel).
  * @param height Ablak magassága (pixel).
  * @param title Ablak neve.
@@ -52,6 +52,19 @@ int max(int x, int y) {
 }
 
 /**
+ * Létrehoz egy SDL_Color példányt, ami dinamikusan van lefoglalva a memóriában.
+ * @return A létrehozott struct példány, a hivó kötelessége felszabadítani.
+ */
+SDL_Color *create_color(Uint32 color) {
+    SDL_Color *c = (SDL_Color*) malloc(sizeof(SDL_Color));
+    c->r = (color >> 24) & 0xff;
+    c->g = (color >> 16) & 0xff;
+    c->b = (color >> 8) & 0xff;
+    c->a = color & 0xff;
+    return c;
+}
+
+/**
  * Létrehozza a grid paramétereket tartalmazó structot dinamikus memóriában.
  * @param width A játéktér szélessége pixelben.
  * @param height A játéktér magassága pixelben.
@@ -65,7 +78,7 @@ int max(int x, int y) {
  * @return A létrehozott struct példány pointere, a hívó kötelessége felszabadítani a free_grid_params() függvény hívásával.
  */
 GridParams *create_grid_params(short width, short height, short cellsX, short cellsY, short padding,
-                               SDL_Color *deadColor, SDL_Color *liveColor, SDL_Color *borderColor, SDL_Color *bgColor) {
+                               Uint32 deadColor, Uint32 liveColor, Uint32 borderColor, Uint32 bgColor) {
     GridParams *params = (GridParams*) malloc(sizeof(GridParams));
     short ratio = (short) (min(width, height) / max(cellsX, cellsY));
     params->cellsX = cellsX;
@@ -76,14 +89,15 @@ GridParams *create_grid_params(short width, short height, short cellsX, short ce
     params->height = (short) (height - 2 * params->padding - (params->borderWidth % 2 == 0 ? 0 : 1));
     params->cellWidth = params->width / (double) cellsX;
     params->cellHeight = params->height / (double) cellsY;
-    params->deadColor = deadColor;
-    params->liveColor = liveColor;
-    params->borderColor = borderColor;
-    params->bgColor = bgColor;
+    params->deadColor = create_color(deadColor);
+    params->liveColor = create_color(liveColor);
+    params->borderColor = create_color(borderColor);
+    params->bgColor = create_color(bgColor);
     return params;
 }
 
 void free_grid_params(GridParams *params) {
+    if (params == NULL) return;
     free(params->deadColor);
     free(params->liveColor);
     free(params->borderColor);
@@ -145,18 +159,4 @@ void draw_cells(SDL_Renderer *renderer, GridParams *params, GameField *field) {
                     c->r, c->g, c->b, c->a);
         }
     }
-}
-
-/**
- * Létrehoz egy SDL_Color példányt, ami dinamikusan van lefoglalva a memóriában.
- * @return A létrehozott struct példány, a hivó kötelessége felszabadítani.
- */
-
-SDL_Color *create_color(Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
-    SDL_Color *color = (SDL_Color*) malloc(sizeof(SDL_Color));
-    color->r = r;
-    color->g = g;
-    color->b = b;
-    color->a = a;
-    return color;
 }
