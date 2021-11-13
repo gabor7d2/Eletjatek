@@ -1,15 +1,13 @@
 #include "debugmalloc.h"
-#include "jateklogika.h"
+#include "gamelogic.h"
 
 /**
  * Létrehoz egy megadott méretű játékteret.
  * @param sizeX A játéktér hány cella széles legyen.
  * @param sizeY A játéktér hány cella magas legyen.
- * @return A játéktér pointere, a hívó kötelessége felszabadítani a free_field() függvény hívásával.
+ * @return A létrehozott játéktér példány pointere, a hívó kötelessége felszabadítani a free_field() függvény hívásával.
  */
 GameField* create_field(short sizeX, short sizeY) {
-    srand(time(0));
-
     GameField* field = malloc(sizeof(GameField));
     field->sizeX = sizeX;
     field->sizeY = sizeY;
@@ -33,10 +31,9 @@ GameField* create_field(short sizeX, short sizeY) {
     // Feltöltés alapállapottal
     for (int x = 0; x < sizeX; ++x) {
         for (int y = 0; y < sizeY; ++y) {
-            cells[y][x] = rand() % 2 == 0 ? DEAD : LIVE;
+            cells[y][x] = DEAD;
         }
     }
-    printf("field created\n");
 
     field->cells = cells;
     return field;
@@ -51,4 +48,18 @@ void free_field(GameField *field) {
     free(field->cells[0]);
     free(field->cells);
     free(field);
+}
+
+void change_cell(GameField *field, GridParams *params, int x, int y, CellState state) {
+    if (field == NULL || params == NULL) return;
+
+    x -= params->padding;
+    y -= params->padding;
+
+    int cellX = x / params->cellWidth;
+    int cellY = y / params->cellHeight;
+
+    if (cellX >= field->sizeX || cellY >= field->sizeY) return;
+
+    field->cells[cellY][cellX] = state;
 }
