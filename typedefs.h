@@ -5,12 +5,14 @@
 
 // Enum a cellaállapotokhoz
 typedef enum {
-    LIVE, DEAD
+    DEAD, LIVE
 } CellState;
 
 // Struct a játéktér (cellák) tárolására
 typedef struct {
-    CellState **cells;
+    // Jelenlegi cellák és új cellák
+    // (az új cellák arraybe kerülnek a következő iteráció cellaértékei majd a 2 fel lesz cserélve)
+    CellState **cells, **newCells;
     // Cellák mennyisége mindkét irányban
     short sizeX, sizeY;
 } GameField;
@@ -21,5 +23,12 @@ typedef struct {
     double cellWidth, cellHeight;
     SDL_Color *deadColor, *liveColor, *borderColor, *bgColor;
 } GridParams;
+
+// Struct a szimulációhoz szükséges adatok mozgatására
+typedef struct {
+    bool *running, *renderNeeded;
+    int *speedMs;
+    GameField *gameField;
+} SimData;
 
 #endif //ELETJATEK_TYPEDEFS_H

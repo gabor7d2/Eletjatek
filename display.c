@@ -79,8 +79,13 @@ SDL_Color *create_color(Uint32 color) {
  */
 GridParams *create_grid_params(short width, short height, short cellsX, short cellsY, short padding,
                                Uint32 deadColor, Uint32 liveColor, Uint32 borderColor, Uint32 bgColor) {
+    // Hely lefoglalása
     GridParams *params = (GridParams*) malloc(sizeof(GridParams));
+
+    // Ratio kiszámolása - ez az az érték, ami megmondja, milyen vastagak legyenek az elválasztó szegélyek
     short ratio = (short) (min(width, height) / max(cellsX, cellsY));
+
+    // Értékek előre kiszámítása és beállítása
     params->cellsX = cellsX;
     params->cellsY = cellsY;
     params->borderWidth = ceil(ratio / 12.0);
@@ -96,6 +101,10 @@ GridParams *create_grid_params(short width, short height, short cellsX, short ce
     return params;
 }
 
+/**
+ * Felszabadítja a memóriából a megadott grid paraméterek példányt.
+ * @param params A grid paraméterek példány.
+ */
 void free_grid_params(GridParams *params) {
     if (params == NULL) return;
     free(params->deadColor);

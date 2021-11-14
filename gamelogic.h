@@ -11,4 +11,6 @@ void free_field(GameField *field);
 
 void change_cell(GameField *field, GridParams *params, int x, int y, CellState state);
 
+void evolve(GameField *field);
+
 #endif //ELETJATEK_GAMELOGIC_H
