@@ -2,6 +2,7 @@
 #define ELETJATEK_TYPEDEFS_H
 
 #include <SDL.h>
+#include <stdbool.h>
 
 // Enum a cellaállapotokhoz
 typedef enum {
@@ -11,7 +12,7 @@ typedef enum {
 // Struct a játéktér (cellák) tárolására
 typedef struct {
     // Jelenlegi cellák és új cellák
-    // (az új cellák arraybe kerülnek a következő iteráció cellaértékei majd a 2 fel lesz cserélve)
+    // (a newCells tömbbe kerülnek a következő iteráció cellaértékei majd a 2 fel lesz cserélve)
     CellState **cells, **newCells;
     // Cellák mennyisége mindkét irányban
     short sizeX, sizeY;

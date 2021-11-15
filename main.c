@@ -4,9 +4,11 @@
 #include "debugmalloc.h"
 #include "display.h"
 #include "gamelogic.h"
+#include "filehandling.h"
 
 // SDL kezeléséhez használt dokumentáció: https://infoc.eet.bme.hu/sdl/
 
+// Időzítő, mely 20ms-enként generál egy SDL_USEREVENT-et
 Uint32 render_tick(Uint32 ms, void *param) {
     SDL_Event ev;
     ev.type = SDL_USEREVENT;
@@ -14,6 +16,8 @@ Uint32 render_tick(Uint32 ms, void *param) {
     return ms;
 }
 
+// Időzítő, mely változtatható gyorsaságú,
+// és a szimuláció következő iterációját számolja ki
 Uint32 sim_tick(Uint32 ms, void *param) {
     SimData *data = (SimData*) param;
     if (*(data->running)) {
@@ -26,8 +30,8 @@ Uint32 sim_tick(Uint32 ms, void *param) {
 int main(int argc, char *argv[]) {
     short WIDTH = 1000;
     short HEIGHT = 1000;
-    short cellsX = 100;
-    short cellsY = 100;
+    short cellsX = 50;
+    short cellsY = 50;
 
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -48,7 +52,7 @@ int main(int argc, char *argv[]) {
     CellState drawMode = LIVE;
     int prevPosX = 0;
     int prevPosY = 0;
-    int simSpeedMs = 251;
+    int simSpeedMs = 101;
     SDL_Event event;
 
     // Create simulation timer
@@ -58,6 +62,7 @@ int main(int argc, char *argv[]) {
         exit(2);
     }
 
+    // Main event loop
     while (SDL_WaitEvent(&event) && event.type != SDL_QUIT) {
         switch (event.type) {
             case SDL_MOUSEBUTTONDOWN:
@@ -111,6 +116,25 @@ int main(int argc, char *argv[]) {
                     case SDLK_DOWN:
                         if (simSpeedMs <= 491) simSpeedMs += 10;
                         break;
+                    case SDLK_RETURN:
+                        if (!drawing && !simRunning) {
+                            evolve(gameField);
+                            renderNeeded = true;
+                        }
+                        break;
+                    case SDLK_e:
+                        if (!drawing && !simRunning) {
+                            export_game("palya.dat", gameField);
+                        }
+                        break;
+                    case SDLK_i:
+                        if (!drawing && !simRunning) {
+                            import_game("palya.dat", gameField);
+                            renderNeeded = true;
+                        }
+                        break;
+                        // todo resize?
+                        // todo window resize?
                 }
                 break;
             case SDL_USEREVENT:
