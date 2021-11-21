@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 99)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake-build-debug/sdl2)
 
-add_executable(eletjatek main.c display.c display.h gamelogic.c gamelogic.h typedefs.h filehandling.c filehandling.h)
+add_executable(eletjatek {PROJECT_SOURCE_DIR}/ main.c grid_display.c grid_display.h gamelogic.c gamelogic.h filehandling.c filehandling.h typedefs.h display.c display.h)
 
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 

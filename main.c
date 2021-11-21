@@ -3,6 +3,7 @@
 
 #include "debugmalloc.h"
 #include "display.h"
+#include "grid_display.h"
 #include "gamelogic.h"
 #include "filehandling.h"
 
@@ -30,8 +31,8 @@ Uint32 sim_tick(Uint32 ms, void *param) {
 int main(int argc, char *argv[]) {
     short WIDTH = 1000;
     short HEIGHT = 1000;
-    short cellsX = 50;
-    short cellsY = 50;
+    short cellsX = 20;
+    short cellsY = 20;
 
     SDL_Window *window;
     SDL_Renderer *renderer;
