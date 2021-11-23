@@ -29,17 +29,19 @@ Uint32 sim_tick(Uint32 ms, void *param) {
 }
 
 int main(int argc, char *argv[]) {
-    short WIDTH = 1000;
-    short HEIGHT = 1000;
-    short cellsX = 20;
-    short cellsY = 20;
+    short windowWidth = 800;
+    short windowHeight = 800;
+    short cellsX = 50;
+    short cellsY = 50;
+    short padding = 10;
+
+    GridParams *gridParams = create_grid_params(windowWidth, windowHeight, cellsX, cellsY, padding,
+                                                0x212121ff, 0xffb300ff, 0x424242ff, 0xfff176ff);
+    GameField *gameField = create_field(cellsX, cellsY);
 
     SDL_Window *window;
     SDL_Renderer *renderer;
-    sdl_init(WIDTH, HEIGHT, "Game Of Life", &window, &renderer);
-
-    GridParams *gridParams = create_grid_params(WIDTH, HEIGHT, cellsX, cellsY, 10, 0x212121ff, 0xffb300ff, 0x424242ff, 0xfff176ff);
-    GameField *gameField = create_field(cellsX, cellsY);
+    sdl_init(windowWidth, windowHeight, "Game Of Life", &window, &renderer);
 
     // Create and start render timer
     if (SDL_AddTimer(20, render_tick, NULL) == 0) {
@@ -140,11 +142,22 @@ int main(int argc, char *argv[]) {
                 break;
             case SDL_USEREVENT:
                 if (renderNeeded) {
-                    clear_background(renderer, WIDTH, HEIGHT, gridParams->bgColor);
+                    clear_background(renderer, windowWidth, windowHeight, gridParams->bgColor);
                     draw_cells(renderer, gridParams, gameField);
                     draw_grid(renderer, gridParams);
                     SDL_RenderPresent(renderer);
                     renderNeeded = false;
+                }
+                break;
+            case SDL_WINDOWEVENT:
+                if (event.window.event == SDL_WINDOWEVENT_RESIZED)
+                    printf("resized: %d, %d\n", event.window.data1, event.window.data2);
+                if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+                    windowWidth = (short) event.window.data1;
+                    windowHeight = (short) event.window.data2;
+                    resize_grid_params(gridParams, windowWidth, windowHeight, cellsX, cellsY, padding);
+                    renderNeeded = true;
+                    printf("size changed: %d, %d\n", event.window.data1, event.window.data2);
                 }
                 break;
         }

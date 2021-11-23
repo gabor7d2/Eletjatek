@@ -6,6 +6,8 @@
 
 #include "typedefs.h"
 
+void resize_grid_params(GridParams *params, short width, short height, short cellsX, short cellsY, short padding);
+
 GridParams *create_grid_params(short width, short height, short cellsX, short cellsY, short padding,
                                Uint32 deadColor, Uint32 liveColor, Uint32 borderColor, Uint32 bgColor);
 

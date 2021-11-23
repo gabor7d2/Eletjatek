@@ -16,7 +16,7 @@ void sdl_init(int width, int height, char *title, SDL_Window **pwindow, SDL_Rend
         exit(1);
     }
 
-    SDL_Window *window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, 0);
+    SDL_Window *window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_RESIZABLE);
     if (window == NULL) {
         SDL_Log("Couldn't create window: %s", SDL_GetError());
         exit(1);

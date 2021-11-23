@@ -31,6 +31,29 @@ SDL_Color *create_color(Uint32 color) {
 }
 
 /**
+ * Újraszámolja a grid paraméterek struct értékeit a megadott új értékek használatával.
+ * @param params A grid paraméterek példány.
+ * @param width A játéktér szélessége pixelben.
+ * @param height A játéktér magassága pixelben.
+ * @param cellsX Cellák száma víszintes irányban.
+ * @param cellsY Cellák száma függőleges irányban.
+ * @param padding A játéktér margójának szélessége.
+ */
+void resize_grid_params(GridParams *params, short width, short height, short cellsX, short cellsY, short padding) {
+    // Ratio kiszámolása - ez az az érték, ami megmondja, milyen vastagak legyenek az elválasztó szegélyek
+    short ratio = (short) (min(width, height) / max(cellsX, cellsY));
+
+    params->cellsX = cellsX;
+    params->cellsY = cellsY;
+    params->borderWidth = ceil(ratio / 12.0);
+    params->padding = (short) (padding + params->borderWidth);
+    params->width = (short) (width - 2 * params->padding - (params->borderWidth % 2 == 0 ? 0 : 1));
+    params->height = (short) (height - 2 * params->padding - (params->borderWidth % 2 == 0 ? 0 : 1));
+    params->cellWidth = params->width / (double) cellsX;
+    params->cellHeight = params->height / (double) cellsY;
+}
+
+/**
  * Létrehozza a grid paramétereket tartalmazó structot dinamikus memóriában.
  * @param width A játéktér szélessége pixelben.
  * @param height A játéktér magassága pixelben.
@@ -48,18 +71,8 @@ GridParams *create_grid_params(short width, short height, short cellsX, short ce
     // Hely lefoglalása
     GridParams *params = (GridParams*) malloc(sizeof(GridParams));
 
-    // Ratio kiszámolása - ez az az érték, ami megmondja, milyen vastagak legyenek az elválasztó szegélyek
-    short ratio = (short) (min(width, height) / max(cellsX, cellsY));
-
     // Értékek előre kiszámítása és beállítása
-    params->cellsX = cellsX;
-    params->cellsY = cellsY;
-    params->borderWidth = ceil(ratio / 12.0);
-    params->padding = (short) (padding + params->borderWidth);
-    params->width = (short) (width - 2 * params->padding - (params->borderWidth % 2 == 0 ? 0 : 1));
-    params->height = (short) (height - 2 * params->padding - (params->borderWidth % 2 == 0 ? 0 : 1));
-    params->cellWidth = params->width / (double) cellsX;
-    params->cellHeight = params->height / (double) cellsY;
+    resize_grid_params(params, width, height, cellsX, cellsY, padding);
     params->deadColor = create_color(deadColor);
     params->liveColor = create_color(liveColor);
     params->borderColor = create_color(borderColor);
