@@ -9,6 +9,14 @@ typedef enum {
     DEAD, LIVE
 } CellState;
 
+typedef struct {
+    short x, y;
+} Vector2s;
+
+typedef struct {
+    double x, y;
+} Vector2d;
+
 // Struct a játéktér (cellák) tárolására
 typedef struct {
     // Jelenlegi cellák és új cellák
@@ -20,8 +28,10 @@ typedef struct {
 
 // Struct a grid paramétereknek
 typedef struct {
-    short width, height, cellsX, cellsY, borderWidth, padding;
-    double cellWidth, cellHeight;
+    // TODO use SDL_Rect
+    SDL_Rect gameArea;
+    Vector2s borderWidth, padding, cells;
+    Vector2d cellSize;
     SDL_Color *deadColor, *liveColor, *borderColor, *bgColor;
 } GridParams;
 

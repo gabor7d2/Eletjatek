@@ -84,13 +84,13 @@ void change_cell(GameField *field, GridParams *params, int x, int y, CellState s
     if (field == NULL || params == NULL) return;
 
     // Négyzetrácson kívüli kattintás
-    if (x < params->padding || y < params->padding) return;
+    if (x < params->padding.x || y < params->padding.y) return;
 
-    x -= params->padding;
-    y -= params->padding;
+    x -= params->padding.x;
+    y -= params->padding.y;
 
-    int cellX = x / params->cellWidth;
-    int cellY = y / params->cellHeight;
+    int cellX = x / params->cellSize.x;
+    int cellY = y / params->cellSize.y;
 
     // Négyzetrácson kívüli kattintás
     if (cellX >= field->sizeX || cellY >= field->sizeY) return;

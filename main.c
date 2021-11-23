@@ -7,9 +7,16 @@
 #include "gamelogic.h"
 #include "filehandling.h"
 
+#define DEFAULT_WINDOW_X 800
+#define DEFAULT_WINDOW_Y 800
+#define DEFAULT_CELLS_X 20
+#define DEFAULT_CELLS_Y 20
+#define FRAMETIME 20
+#define DEFAULT_SIM_SPEED_MS 101
+
 // SDL kezeléséhez használt dokumentáció: https://infoc.eet.bme.hu/sdl/
 
-// Időzítő, mely 20ms-enként generál egy SDL_USEREVENT-et
+// Időzítő, mely FRAMETIME-onként generál egy SDL_USEREVENT-et
 Uint32 render_tick(Uint32 ms, void *param) {
     SDL_Event ev;
     ev.type = SDL_USEREVENT;
@@ -29,22 +36,20 @@ Uint32 sim_tick(Uint32 ms, void *param) {
 }
 
 int main(int argc, char *argv[]) {
-    short windowWidth = 800;
-    short windowHeight = 800;
-    short cellsX = 50;
-    short cellsY = 50;
-    short padding = 10;
+    Vector2s windowSize = { .x = DEFAULT_WINDOW_X, .y = DEFAULT_WINDOW_Y };
+    Vector2s cells = { .x = DEFAULT_CELLS_X, .y = DEFAULT_CELLS_Y };
+    Vector2s padding = { .x = 10, .y = 30 };
 
-    GridParams *gridParams = create_grid_params(windowWidth, windowHeight, cellsX, cellsY, padding,
+    GridParams *gridParams = create_grid_params(windowSize, cells, padding,
                                                 0x212121ff, 0xffb300ff, 0x424242ff, 0xfff176ff);
-    GameField *gameField = create_field(cellsX, cellsY);
+    GameField *gameField = create_field(cells.x, cells.y);
 
     SDL_Window *window;
     SDL_Renderer *renderer;
-    sdl_init(windowWidth, windowHeight, "Game Of Life", &window, &renderer);
+    sdl_init(windowSize.x, windowSize.y, "Game Of Life", &window, &renderer);
 
     // Create and start render timer
-    if (SDL_AddTimer(20, render_tick, NULL) == 0) {
+    if (SDL_AddTimer(FRAMETIME, render_tick, NULL) == 0) {
         SDL_Log("Couldn't start render timer: %s", SDL_GetError());
         exit(2);
     }
@@ -55,7 +60,7 @@ int main(int argc, char *argv[]) {
     CellState drawMode = LIVE;
     int prevPosX = 0;
     int prevPosY = 0;
-    int simSpeedMs = 101;
+    int simSpeedMs = DEFAULT_SIM_SPEED_MS;
     SDL_Event event;
 
     // Create simulation timer
@@ -142,7 +147,7 @@ int main(int argc, char *argv[]) {
                 break;
             case SDL_USEREVENT:
                 if (renderNeeded) {
-                    clear_background(renderer, windowWidth, windowHeight, gridParams->bgColor);
+                    clear_background(renderer, windowSize, gridParams->bgColor);
                     draw_cells(renderer, gridParams, gameField);
                     draw_grid(renderer, gridParams);
                     SDL_RenderPresent(renderer);
@@ -153,9 +158,9 @@ int main(int argc, char *argv[]) {
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED)
                     printf("resized: %d, %d\n", event.window.data1, event.window.data2);
                 if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-                    windowWidth = (short) event.window.data1;
-                    windowHeight = (short) event.window.data2;
-                    resize_grid_params(gridParams, windowWidth, windowHeight, cellsX, cellsY, padding);
+                    windowSize.x = (short) event.window.data1;
+                    windowSize.y = (short) event.window.data2;
+                    resize_grid_params(gridParams, windowSize, cells, padding);
                     renderNeeded = true;
                     printf("size changed: %d, %d\n", event.window.data1, event.window.data2);
                 }

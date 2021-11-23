@@ -36,11 +36,10 @@ void sdl_init(int width, int height, char *title, SDL_Window **pwindow, SDL_Rend
  * Kitölti az összes pixelt az ablakban a 0,0 saroktól a megadott width-1,height-1 sarokig a megadott színnel.
  *  A renderert szükséges renderelésre meghívni a függvény visszatérte után.
  * @param renderer A renderer.
- * @param width A szélesség, amekkora területet szeretnénk átszínezni.
- * @param height A magasság, amekkora területet szeretnénk átszínezni.
+ * @param size A terület mérete, amit át szeretnénk színezni.
  * @param bgcolor A színezéshez használt szín.
  */
-void clear_background(SDL_Renderer *renderer, short width, short height, SDL_Color *bgcolor) {
+void clear_background(SDL_Renderer *renderer, Vector2s size, SDL_Color *bgcolor) {
     if (renderer == NULL || bgcolor == NULL) return;
-    boxRGBA(renderer, 0, 0, (short) (width - 1), (short) (height - 1), bgcolor->r, bgcolor->g, bgcolor->b, bgcolor->a);
+    boxRGBA(renderer, 0, 0, (short) (size.x - 1), (short) (size.y - 1), bgcolor->r, bgcolor->g, bgcolor->b, bgcolor->a);
 }

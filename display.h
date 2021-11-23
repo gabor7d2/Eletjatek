@@ -3,9 +3,10 @@
 
 #include <SDL.h>
 #include <SDL2_gfxPrimitives.h>
+#include "typedefs.h"
 
 void sdl_init(int width, int height, char *title, SDL_Window **pwindow, SDL_Renderer **prenderer);
 
-void clear_background(SDL_Renderer *renderer, short width, short height, SDL_Color *bgcolor);
+void clear_background(SDL_Renderer *renderer, Vector2s size, SDL_Color *bgcolor);
 
 #endif //ELETJATEK_DISPLAY_H
