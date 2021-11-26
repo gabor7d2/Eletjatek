@@ -1,3 +1,4 @@
+#include "debugmalloc.h"
 #include "filehandling.h"
 #include "gamelogic.h"
 

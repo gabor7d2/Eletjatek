@@ -129,6 +129,12 @@ Button *create_button(SDL_Renderer *renderer, SDL_Rect area, MenuAction action, 
     return btn;
 }
 
+/**
+ * A rendererbe rajzolja a megadott gombot.
+ * @param renderer A renderer.
+ * @param button A gomb.
+ * @param offset A gomb területéhez képest mennyivel legyen eltolva a gomb helye.
+ */
 void draw_button(SDL_Renderer *renderer, Button *button, Vector2s *offset) {
     boxRGBA(renderer, offset->x + button->area.x, offset->y + button->area.y, offset->x + button->area.x + button->area.w, offset->y + button->area.y + button->area.h,
     200, 200, 200, 127);
@@ -138,16 +144,31 @@ void draw_button(SDL_Renderer *renderer, Button *button, Vector2s *offset) {
     SDL_RenderCopy(renderer, button->text.texture, NULL, &dst);
 }
 
+/**
+ * Hozzáadja a megadott gombot a menühöz.
+ * @param menu A menü.
+ * @param button A gomb.
+ */
 void add_button(Menu *menu, Button *button) {
     menu->buttons = (Button**) realloc(menu->buttons, sizeof(Button*) * (menu->buttonCount + 1));
     menu->buttons[menu->buttonCount++] = button;
 }
 
+/**
+ * Megmondja, hogy a 'point' benne van-e az 'offset'-tel eltolt 'rect' területen.
+ * @return Igaz, ha benne van, hamis, ha nincs benne.
+ */
 bool inside_rect(SDL_Rect *rect, SDL_Point *point, SDL_Rect *offset) {
     SDL_Rect offsetedRect = { .x = offset->x + rect->x, .y = offset->y + rect->y, .w = rect->w, .h = rect->h };
     return SDL_PointInRect(point, &offsetedRect);
 }
 
+/**
+ * Megkeresi az első gombot, ami a megadott képernyőkoordinátákon van.
+ * @param menu A menü.
+ * @param point A képernyőkoordináták.
+ * @return Az első megtalált gomb, vagy NULL, ha nincs találat.
+ */
 Button *find_button(Menu *menu, SDL_Point *point) {
     for (int i = 0; i < menu->buttonCount; ++i) {
         if (inside_rect(&menu->buttons[i]->area, point, menu->area))

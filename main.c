@@ -173,6 +173,7 @@ int main(int argc, char *argv[]) {
                 }
                 break;
             case SDL_USEREVENT:
+                // rendering
                 if (renderNeeded) {
                     fill_rect(renderer, &windowArea, gridParams->bgColor);
                     draw_cells(renderer, gridParams, gameField);
@@ -188,6 +189,7 @@ int main(int argc, char *argv[]) {
                 }
                 break;
             case SDL_WINDOWEVENT:
+                // window resize
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED)
                     printf("resized: %d, %d\n", event.window.data1, event.window.data2);
                 if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
@@ -208,6 +210,7 @@ int main(int argc, char *argv[]) {
 
     SDL_Quit();
 
+    // felszabadítás
     free_grid_params(gridParams);
     free_field(gameField);
     free_menu(menu);

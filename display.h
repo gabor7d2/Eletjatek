@@ -1,8 +1,6 @@
 #ifndef ELETJATEK_DISPLAY_H
 #define ELETJATEK_DISPLAY_H
 
-#include <SDL.h>
-#include <SDL2_gfxPrimitives.h>
 #include "typedefs.h"
 
 SDL_Color *create_color(Uint32 color);

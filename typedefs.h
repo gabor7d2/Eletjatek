@@ -2,8 +2,9 @@
 #define ELETJATEK_TYPEDEFS_H
 
 #include <SDL.h>
-#include <stdbool.h>
+#include <SDL2_gfxPrimitives.h>
 #include <SDL_ttf.h>
+#include <stdbool.h>
 
 // Enum a cellaállapotokhoz
 typedef enum {

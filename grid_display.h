@@ -1,9 +1,6 @@
 #ifndef ELETJATEK_GRID_DISPLAY_H
 #define ELETJATEK_GRID_DISPLAY_H
 
-#include <SDL.h>
-#include <SDL2_gfxPrimitives.h>
-
 #include "typedefs.h"
 
 void resize_grid_params(GridParams *params, SDL_Rect gameArea, Vector2s cells);
