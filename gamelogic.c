@@ -76,21 +76,20 @@ void free_field(GameField *field) {
  * és megváltoztatja annak állapotát a megadott állapotra.
  * @param field A játéktér.
  * @param params A grid paraméterek.
- * @param x A változtatni kívánt cella x képernyőkoordinátája.
- * @param y A változtatni kívánt cella y képernyőkoordinátája.
+ * @param pos A változtatni kívánt cella képernyőkoordinátái.
  * @param state A változtatni kívánt cella új állapota.
  */
-void change_cell(GameField *field, GridParams *params, int x, int y, CellState state) {
+void change_cell(GameField *field, GridParams *params, SDL_Point pos, CellState state) {
     if (field == NULL || params == NULL) return;
 
     // Négyzetrácson kívüli kattintás
-    if (x < params->padding.x || y < params->padding.y) return;
+    if (pos.x < params->padding.x || pos.y < params->padding.y) return;
 
-    x -= params->padding.x;
-    y -= params->padding.y;
+    pos.x -= params->padding.x;
+    pos.y -= params->padding.y;
 
-    int cellX = x / params->cellSize.x;
-    int cellY = y / params->cellSize.y;
+    int cellX = pos.x / params->cellSize.x;
+    int cellY = pos.y / params->cellSize.y;
 
     // Négyzetrácson kívüli kattintás
     if (cellX >= field->sizeX || cellY >= field->sizeY) return;

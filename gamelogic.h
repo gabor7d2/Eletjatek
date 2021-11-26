@@ -9,7 +9,7 @@ GameField* create_field(short sizeX, short sizeY);
 
 void free_field(GameField *field);
 
-void change_cell(GameField *field, GridParams *params, int x, int y, CellState state);
+void change_cell(GameField *field, GridParams *params, SDL_Point pos, CellState state);
 
 void evolve(GameField *field);
 

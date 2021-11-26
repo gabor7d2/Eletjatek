@@ -1,17 +1,23 @@
 #include "debugmalloc.h"
 #include "grid_display.h"
+#include "display.h"
 
-/**
- * Létrehoz egy SDL_Color példányt, ami dinamikusan van lefoglalva a memóriában.
- * @return A létrehozott struct példány, a hivó kötelessége felszabadítani.
+#define MIN_PADDING 10
+
+/*
+ * Összehasonlít két számot, majd visszatéríti a kisebbet.
  */
-SDL_Color *create_color(Uint32 color) {
-    SDL_Color *c = (SDL_Color*) malloc(sizeof(SDL_Color));
-    c->r = (color >> 24) & 0xff;
-    c->g = (color >> 16) & 0xff;
-    c->b = (color >> 8) & 0xff;
-    c->a = color & 0xff;
-    return c;
+int min(int x, int y) {
+    if (x > y) return y;
+    else return x;
+}
+
+/*
+ * Összehasonlít két számot, majd visszatéríti a nagyobbat.
+ */
+int max(int x, int y) {
+    if (x > y) return x;
+    else return y;
 }
 
 /**
@@ -21,21 +27,35 @@ SDL_Color *create_color(Uint32 color) {
  * @param cells A cellák száma vízszintesen és függőlegesen.
  * @param padding A játéktér margójának nagysága pixelben.
  */
-void resize_grid_params(GridParams *params, Vector2s gameArea, Vector2s cells, Vector2s padding) {
+void resize_grid_params(GridParams *params, SDL_Rect gameArea, Vector2s cells) {
     params->cells = cells;
 
-    Vector2s borderWidth = { .x = (short) (((double) gameArea.x / cells.x) / 12.0), .y = (short) (((double) gameArea.y / cells.y) / 12.0) };
+    short borderWidthValue = (short) ceil((min(gameArea.w, gameArea.h) / (double) max(cells.x, cells.y)) / 12.0);
+    Vector2s borderWidth = { .x = borderWidthValue, .y = borderWidthValue };
     params->borderWidth = borderWidth;
+
+    // Margó kiszámolása a cellák száma és a játéktér mérete alapján, hogy a cellák
+    // ugyanolyan szélesek legyenek mint magasak
+    Vector2s padding;
+    if ((gameArea.w / (double) cells.x) > (gameArea.h / (double) cells.y)) {
+        padding.y = MIN_PADDING;
+        padding.x = (short) ((gameArea.w - ((gameArea.h - 2 * padding.y) / (double) cells.y) * cells.x) / 2);
+        padding.x = (short) max(MIN_PADDING, padding.x);
+    } else {
+        padding.x = MIN_PADDING;
+        padding.y = (short) ((gameArea.h - ((gameArea.w - 2 * padding.x) / (double) cells.x) * cells.y) / 2);
+        padding.y = (short) max(MIN_PADDING, padding.y);
+    }
 
     Vector2s newPadding = { .x = (short) (padding.x + borderWidth.x), .y = (short) (padding.y + borderWidth.y) };
     params->padding = newPadding;
 
-    gameArea.x = (short) (gameArea.x - 2 * newPadding.x - (borderWidth.x % 2 == 0 ? 0 : 1));
-    gameArea.y = (short) (gameArea.y - 2 * newPadding.y - (borderWidth.y % 2 == 0 ? 0 : 1));
-    SDL_Rect newGameArea = { .x = padding.x, .y = padding.y, .w = gameArea.x, .h = gameArea.y };
+    gameArea.w = (short) (gameArea.w - 2 * newPadding.x - (borderWidth.x % 2 == 0 ? 0 : 1));
+    gameArea.h = (short) (gameArea.h - 2 * newPadding.y - (borderWidth.y % 2 == 0 ? 0 : 1));
+    SDL_Rect newGameArea = { .x = newPadding.x, .y = newPadding.y, .w = gameArea.w, .h = gameArea.h };
     params->gameArea = newGameArea;
 
-    Vector2d cellSize = { .x = gameArea.x / (double) cells.x, .y = gameArea.y / (double) cells.y };
+    Vector2d cellSize = { .x = gameArea.w / (double) cells.x, .y = gameArea.h / (double) cells.y };
     params->cellSize = cellSize;
 }
 
@@ -43,20 +63,19 @@ void resize_grid_params(GridParams *params, Vector2s gameArea, Vector2s cells, V
  * Létrehozza a grid paramétereket tartalmazó structot dinamikus memóriában.
  * @param gameArea A játéktér mérete pixelben (margókkal együtt).
  * @param cells A cellák száma vízszintesen és függőlegesen.
- * @param padding A játéktér margójának nagysága pixelben.
  * @param deadColor A halott cellák színe.
  * @param liveColor Az élő cellák színe.
  * @param borderColor A szegély színe.
  * @param bgColor A háttérszín, a margónak a színe.
  * @return A létrehozott struct példány pointere, a hívó kötelessége felszabadítani a free_grid_params() függvény hívásával.
  */
-GridParams *create_grid_params(Vector2s gameArea, Vector2s cells, Vector2s padding,
+GridParams *create_grid_params(SDL_Rect gameArea, Vector2s cells,
                                Uint32 deadColor, Uint32 liveColor, Uint32 borderColor, Uint32 bgColor) {
     // Hely lefoglalása
     GridParams *params = (GridParams*) malloc(sizeof(GridParams));
 
     // Értékek előre kiszámítása és beállítása
-    resize_grid_params(params, gameArea, cells, padding);
+    resize_grid_params(params, gameArea, cells);
     params->deadColor = create_color(deadColor);
     params->liveColor = create_color(liveColor);
     params->borderColor = create_color(borderColor);

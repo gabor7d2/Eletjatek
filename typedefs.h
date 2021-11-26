@@ -3,11 +3,16 @@
 
 #include <SDL.h>
 #include <stdbool.h>
+#include <SDL_ttf.h>
 
 // Enum a cellaállapotokhoz
 typedef enum {
     DEAD, LIVE
 } CellState;
+
+typedef enum {
+    CLICKME
+} MenuAction;
 
 typedef struct {
     short x, y;
@@ -28,7 +33,6 @@ typedef struct {
 
 // Struct a grid paramétereknek
 typedef struct {
-    // TODO use SDL_Rect
     SDL_Rect gameArea;
     Vector2s borderWidth, padding, cells;
     Vector2d cellSize;
@@ -41,5 +45,33 @@ typedef struct {
     int *speedMs;
     GameField *gameField;
 } SimData;
+
+typedef struct {
+    int w, h;
+    SDL_Texture *texture;
+} Text;
+
+typedef struct {
+    SDL_Rect area;
+    Text text;
+    bool hovered, clicked;
+    MenuAction action;
+} Button;
+
+typedef struct {
+    SDL_Rect area;
+    TTF_Font *font;
+    char *text;
+    bool hovered, clicked, selected;
+} TextField;
+
+typedef struct {
+    SDL_Rect *area;
+    SDL_Color *bgColor;
+    int buttonCount;
+    Button **buttons;
+    int textFieldCount;
+    TextField **textFields;
+} Menu;
 
 #endif //ELETJATEK_TYPEDEFS_H

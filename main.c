@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <SDL.h>
+#include <SDL_ttf.h>
 
 #include "debugmalloc.h"
 #include "display.h"
@@ -7,16 +8,21 @@
 #include "gamelogic.h"
 #include "filehandling.h"
 
-#define DEFAULT_WINDOW_X 800
+#define DEFAULT_WINDOW_X 1100
 #define DEFAULT_WINDOW_Y 800
+#define MIN_WINDOW_X 600
+#define MIN_WINDOW_Y 600
+
+#define MENU_WIDTH 300
+
 #define DEFAULT_CELLS_X 20
 #define DEFAULT_CELLS_Y 20
-#define FRAMETIME 20
+#define FRAMETIME_MS 20
 #define DEFAULT_SIM_SPEED_MS 101
 
 // SDL kezeléséhez használt dokumentáció: https://infoc.eet.bme.hu/sdl/
 
-// Időzítő, mely FRAMETIME-onként generál egy SDL_USEREVENT-et
+// Időzítő, mely FRAMETIME_MS-enként generál egy SDL_USEREVENT-et
 Uint32 render_tick(Uint32 ms, void *param) {
     SDL_Event ev;
     ev.type = SDL_USEREVENT;
@@ -36,20 +42,41 @@ Uint32 sim_tick(Uint32 ms, void *param) {
 }
 
 int main(int argc, char *argv[]) {
-    Vector2s windowSize = { .x = DEFAULT_WINDOW_X, .y = DEFAULT_WINDOW_Y };
+    SDL_Rect windowArea = { .x = 0, .y = 0, .w = DEFAULT_WINDOW_X, .h = DEFAULT_WINDOW_Y };
     Vector2s cells = { .x = DEFAULT_CELLS_X, .y = DEFAULT_CELLS_Y };
-    Vector2s padding = { .x = 10, .y = 30 };
+    SDL_Rect gameArea = { .x = 0, .y = 0, .w = (short) windowArea.w - MENU_WIDTH, .h = windowArea.h };
+    SDL_Rect menuArea = { .x = gameArea.w, .y = 0, .w = windowArea.w - gameArea.w, .h = windowArea.h };
 
-    GridParams *gridParams = create_grid_params(windowSize, cells, padding,
-                                                0x212121ff, 0xffb300ff, 0x424242ff, 0xfff176ff);
+    GridParams *gridParams = create_grid_params(gameArea, cells, 0x212121ff, 0xffb300ff, 0x424242ff, 0xfff176ff);
     GameField *gameField = create_field(cells.x, cells.y);
+
+    Menu *menu = create_menu(&menuArea, 0x7a7a7a77);
 
     SDL_Window *window;
     SDL_Renderer *renderer;
-    sdl_init(windowSize.x, windowSize.y, "Game Of Life", &window, &renderer);
+    sdl_init(windowArea.w, windowArea.h, "Game Of Life", &window, &renderer);
+    SDL_SetWindowMinimumSize(window, MIN_WINDOW_X, MIN_WINDOW_Y);
+
+    TTF_Init();
+    TTF_Font *font = create_font("Chalkboard.ttf", 20);
+
+    SDL_Rect hova = { 0, 0, 0, 0 };
+    SDL_Color color = { .r = 240, .g = 60, .b = 200, .a = 255 };
+
+    SDL_Surface *felirat = TTF_RenderUTF8_Blended(font, "Game Of Life", color);
+    SDL_Texture *felirat_t = SDL_CreateTextureFromSurface(renderer, felirat);
+
+    hova.x = 875 - felirat->w / 2;
+    hova.y = 40;
+    hova.w = felirat->w;
+    hova.h = felirat->h;
+
+    SDL_Rect btnArea = { .x = 20, .y = 60, .w = 200, .h = 80 };
+    Button *btn = create_button(renderer, btnArea, CLICKME, "Click me!", font, color);
+    add_button(menu, btn);
 
     // Create and start render timer
-    if (SDL_AddTimer(FRAMETIME, render_tick, NULL) == 0) {
+    if (SDL_AddTimer(FRAMETIME_MS, render_tick, NULL) == 0) {
         SDL_Log("Couldn't start render timer: %s", SDL_GetError());
         exit(2);
     }
@@ -58,8 +85,7 @@ int main(int argc, char *argv[]) {
     bool simRunning = false;
     bool drawing = false;
     CellState drawMode = LIVE;
-    int prevPosX = 0;
-    int prevPosY = 0;
+    SDL_Point prevPos = { .x = 0, .y = 0};
     int simSpeedMs = DEFAULT_SIM_SPEED_MS;
     SDL_Event event;
 
@@ -70,41 +96,43 @@ int main(int argc, char *argv[]) {
         exit(2);
     }
 
+    Button *foundBtn;
     // Main event loop
     while (SDL_WaitEvent(&event) && event.type != SDL_QUIT) {
         switch (event.type) {
             case SDL_MOUSEBUTTONDOWN:
+                prevPos.x = event.button.x;
+                prevPos.y = event.button.y;
+                foundBtn = find_button(menu, &prevPos);
+                if (foundBtn != NULL && foundBtn->action == CLICKME) {
+                    printf("clicking\n");
+                }
                 if (!simRunning && !drawing) {
-                    if (event.button.button == SDL_BUTTON_LEFT) {
-                        prevPosX = event.button.x;
-                        prevPosY = event.button.y;
+                    if (event.button.button == SDL_BUTTON_RIGHT || event.button.button == SDL_BUTTON_LEFT) {
                         drawing = true;
-                        drawMode = LIVE;
-                    }
-                    else if (event.button.button == SDL_BUTTON_RIGHT) {
-                        prevPosX = event.button.x;
-                        prevPosY = event.button.y;
-                        drawing = true;
-                        drawMode = DEAD;
+                        drawMode = event.button.button == SDL_BUTTON_LEFT ? LIVE : DEAD;
                     }
                 }
                 break;
             case SDL_MOUSEBUTTONUP:
                 if (drawing) {
                     if (event.button.button == SDL_BUTTON_LEFT || event.button.button == SDL_BUTTON_RIGHT) {
-                        change_cell(gameField, gridParams, prevPosX, prevPosY, drawMode);
+                        change_cell(gameField, gridParams, prevPos, drawMode);
                         renderNeeded = true;
                         drawing = false;
                     }
                 }
                 break;
             case SDL_MOUSEMOTION:
+                /*if (find_button(menu, &prevPos) != NULL) {
+                    printf("hovering\n");
+                }*/
                 if (drawing) {
-                    change_cell(gameField, gridParams, prevPosX, prevPosY, drawMode);
+                    change_cell(gameField, gridParams, prevPos, drawMode);
                     renderNeeded = true;
-                    prevPosX = event.motion.x;
-                    prevPosY = event.motion.y;
                 }
+                prevPos.x = event.motion.x;
+                prevPos.y = event.motion.y;
                 break;
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym) {
@@ -141,15 +169,20 @@ int main(int argc, char *argv[]) {
                             renderNeeded = true;
                         }
                         break;
-                        // todo resize?
-                        // todo window resize?
+                        // todo resize
                 }
                 break;
             case SDL_USEREVENT:
                 if (renderNeeded) {
-                    clear_background(renderer, windowSize, gridParams->bgColor);
+                    fill_rect(renderer, &windowArea, gridParams->bgColor);
                     draw_cells(renderer, gridParams, gameField);
                     draw_grid(renderer, gridParams);
+
+                    fill_rect(renderer, &menuArea, menu->bgColor);
+                    SDL_RenderCopy(renderer, felirat_t, NULL, &hova);
+                    Vector2s offset = { .x = (short) menuArea.x, .y = (short) menuArea.y };
+                    draw_button(renderer, btn, &offset);
+
                     SDL_RenderPresent(renderer);
                     renderNeeded = false;
                 }
@@ -158,9 +191,14 @@ int main(int argc, char *argv[]) {
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED)
                     printf("resized: %d, %d\n", event.window.data1, event.window.data2);
                 if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-                    windowSize.x = (short) event.window.data1;
-                    windowSize.y = (short) event.window.data2;
-                    resize_grid_params(gridParams, windowSize, cells, padding);
+                    windowArea.w = (short) event.window.data1;
+                    windowArea.h = (short) event.window.data2;
+                    gameArea.w = (short) windowArea.w - MENU_WIDTH;
+                    gameArea.h = windowArea.h;
+                    menuArea.x = gameArea.w;
+                    menuArea.w = windowArea.w - gameArea.w;
+                    menuArea.h = windowArea.h;
+                    resize_grid_params(gridParams, gameArea, cells);
                     renderNeeded = true;
                     printf("size changed: %d, %d\n", event.window.data1, event.window.data2);
                 }
@@ -172,6 +210,10 @@ int main(int argc, char *argv[]) {
 
     free_grid_params(gridParams);
     free_field(gameField);
+    free_menu(menu);
+    TTF_CloseFont(font);
+    SDL_FreeSurface(felirat);
+    SDL_DestroyTexture(felirat_t);
 
     return 0;
 }

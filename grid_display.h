@@ -6,10 +6,9 @@
 
 #include "typedefs.h"
 
-void resize_grid_params(GridParams *params, Vector2s gameArea, Vector2s cells, Vector2s padding);
+void resize_grid_params(GridParams *params, SDL_Rect gameArea, Vector2s cells);
 
-GridParams *create_grid_params(Vector2s gameArea, Vector2s cells, Vector2s padding,
-                               Uint32 deadColor, Uint32 liveColor, Uint32 borderColor, Uint32 bgColor);
+GridParams *create_grid_params(SDL_Rect gameArea, Vector2s cells, Uint32 deadColor, Uint32 liveColor, Uint32 borderColor, Uint32 bgColor);
 
 void free_grid_params(GridParams *params);
 
