@@ -1,6 +1,7 @@
 #include "menu.h"
-#include "menu_button.h"
+#include "menu_element.h"
 #include "menu_text.h"
+#include "sdl_utils.h"
 
 /**
  * Létrehoz egy Menu struct példányt a megfelelő kezdőadatokkal.
@@ -14,10 +15,8 @@ Menu *create_menu(SDL_Rect menuArea, Uint32 bgColor) {
     set_color(bgColor, &menu->bgColor);
     menu->textCount = 0;
     menu->texts = NULL;
-    menu->buttonCount = 0;
-    menu->buttons = NULL;
-    menu->textFieldCount = 0;
-    menu->textFields = NULL;
+    menu->elementCount = 0;
+    menu->elements = NULL;
     return menu;
 }
 
@@ -25,8 +24,8 @@ void draw_menu(SDL_Renderer *renderer, Menu *menu) {
     fill_rect(renderer, &menu->area, menu->bgColor);
     Vector2s offset = {.x = (short) menu->area.x, .y = (short) menu->area.y};
 
-    for (int i = 0; i < menu->buttonCount; ++i) {
-        draw_button(renderer, menu->buttons[i], offset);
+    for (int i = 0; i < menu->elementCount; ++i) {
+        draw_element(renderer, menu->elements[i], offset);
     }
 
     for (int i = 0; i < menu->textCount; ++i) {
@@ -35,21 +34,19 @@ void draw_menu(SDL_Renderer *renderer, Menu *menu) {
 }
 
 /**
- * Felszabadítja a megadott menüt, és az összes benne levő gombot és szövegdobozt.
+ * Felszabadítja a megadott menüt, és az összes benne levő menüelemet.
  * @param menu A menü.
  */
 void free_menu(Menu *menu) {
     for (int i = 0; i < menu->textCount; ++i) {
         free_text(menu->texts[i]);
     }
-    for (int i = 0; i < menu->buttonCount; ++i) {
-        free_button(menu->buttons[i]);
+    for (int i = 0; i < menu->elementCount; ++i) {
+        free_element(menu->elements[i]);
     }
-    // TODO free textfields
 
     free(menu->texts);
-    free(menu->buttons);
-    free(menu->textFields);
+    free(menu->elements);
     free(menu);
 }
 
@@ -64,12 +61,12 @@ void add_text(Menu *menu, Text *text) {
 }
 
 /**
- * Hozzáadja a megadott gombot és a hozzá tartozó szöveget a menühöz.
+ * Hozzáadja a megadott menüelemet és a hozzá tartozó szöveget a menühöz.
  * @param menu A menü.
- * @param button A gomb.
+ * @param element A menüelem.
  */
-void add_button(Menu *menu, Button *button) {
-    menu->buttons = (Button **) realloc(menu->buttons, sizeof(Button *) * (menu->buttonCount + 1));
-    menu->buttons[menu->buttonCount++] = button;
-    add_text(menu, button->text);
+void add_element(Menu *menu, MenuElement *element) {
+    menu->elements = (MenuElement **) realloc(menu->elements, sizeof(MenuElement *) * (menu->elementCount + 1));
+    menu->elements[menu->elementCount++] = element;
+    add_text(menu, element->text);
 }

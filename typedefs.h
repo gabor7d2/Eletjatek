@@ -5,7 +5,6 @@
 #include <SDL2_gfxPrimitives.h>
 #include <SDL_ttf.h>
 #include <stdbool.h>
-#include "sdl_utils.h"
 #include "debugmalloc.h"
 
 // Enum a cellaállapotokhoz
@@ -16,6 +15,10 @@ typedef enum {
 typedef enum {
     CLICKME
 } MenuAction;
+
+typedef enum {
+    BUTTON, TEXTFIELD
+} MenuElementType;
 
 typedef struct {
     short x, y;
@@ -58,18 +61,21 @@ typedef struct {
 } Text;
 
 typedef struct {
-    SDL_Rect area;
-    Text *text;
-    bool hovered, clicked;
-    MenuAction action;
-} Button;
+    /* @param edgeColor A menüelem szélének a színe.
+    * @param normalColor A menüelem háttérszíne normál állapotban.
+    * @param hoverColor A menüelem háttérszíne amikor a kurzor felette van, vagy meg van nyomva.*/
+    SDL_Color edgeColor, normalColor, interactColor;
+} MenuElementColors;
 
 typedef struct {
+    MenuElementType type;
+    MenuAction action;
+    MenuElementColors colors;
     SDL_Rect area;
     Text *text;
-    bool hovered, clicked, selected;
-    MenuAction action;
-} TextField;
+    short interactAlpha;
+    bool clicked;
+} MenuElement;
 
 typedef struct {
     SDL_Rect area;
@@ -78,11 +84,10 @@ typedef struct {
     int textCount;
     Text **texts;
 
-    int buttonCount;
-    Button **buttons;
-
-    int textFieldCount;
-    TextField **textFields;
+    int elementCount;
+    MenuElement **elements;
+    MenuElement *foundElement;
+    MenuElement *selTextField;
 } Menu;
 
 typedef struct {

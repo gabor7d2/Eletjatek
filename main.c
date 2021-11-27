@@ -1,8 +1,9 @@
 #include "menu.h"
-#include "menu_button.h"
+#include "menu_element.h"
 #include "game_display.h"
 #include "game_logic.h"
 #include "file_handling.h"
+#include "sdl_utils.h"
 
 #define DEFAULT_WINDOW_X 1050
 #define DEFAULT_WINDOW_Y 800
@@ -37,11 +38,20 @@ Uint32 sim_tick(Uint32 ms, void *param) {
     return *(data->speedMs);
 }
 
+void setup() {
+
+}
+
+void exit() {
+
+}
+
 int main(int argc, char *argv[]) {
-    Vector2s cells = {.x = DEFAULT_CELLS_X, .y = DEFAULT_CELLS_Y};
-    SDL_Rect windowArea = {.x = 0, .y = 0, .w = DEFAULT_WINDOW_X, .h = DEFAULT_WINDOW_Y};
-    SDL_Rect gameArea = {.x = 0, .y = 0, .w = (short) windowArea.w - MENU_WIDTH, .h = windowArea.h};
-    SDL_Rect menuArea = {.x = gameArea.w, .y = 0, .w = windowArea.w - gameArea.w, .h = windowArea.h};
+    // TODO split main
+    Vector2s cells = {DEFAULT_CELLS_X, DEFAULT_CELLS_Y};
+    SDL_Rect windowArea = {0, 0, DEFAULT_WINDOW_X, DEFAULT_WINDOW_Y};
+    SDL_Rect gameArea = {0, 0, (short) windowArea.w - MENU_WIDTH, windowArea.h};
+    SDL_Rect menuArea = {gameArea.w, 0, windowArea.w - gameArea.w, windowArea.h};
 
     SDL_Window *window;
     SDL_Renderer *renderer;
@@ -56,9 +66,14 @@ int main(int argc, char *argv[]) {
     Game game = {.renderer = renderer, .gridParams = gridParams, .gameField = gameField, .menu = menu, .windowArea = windowArea};
 
     TTF_Font *font = create_font("Chalkboard.ttf", 20);
-    SDL_Rect btnArea = {.x = 20, .y = 60, .w = 200, .h = 80};
-    Button *btn = create_button(renderer, btnArea, CLICKME, "Click me!", font, 0xee70ccff);
-    add_button(menu, btn);
+    Uint32 textColor = 0xee70ccff;
+    // TODO unify color format
+    MenuElementColors colors = {200, 200, 200, 127,
+                                80, 80, 80, 255,
+                                20, 20, 20, 0};
+    SDL_Rect btnArea;
+    set_rect(20, 60, 200, 80, &btnArea);
+    add_element(menu, create_button(renderer, btnArea, CLICKME, "Click me!", font, textColor, colors));
 
     // Create and start render timer
     if (SDL_AddTimer(FRAMETIME_MS, render_tick, NULL) == 0) {
@@ -83,15 +98,17 @@ int main(int argc, char *argv[]) {
         exit(2);
     }
 
-    Button *foundBtn;
+    MenuElement *foundElement;
     // Main event loop
+    // TODO separate event handler file
     while (SDL_WaitEvent(&event) && event.type != SDL_QUIT) {
         switch (event.type) {
             case SDL_MOUSEBUTTONDOWN:
                 cursorPos.x = event.button.x;
                 cursorPos.y = event.button.y;
-                foundBtn = find_button(menu, &cursorPos);
-                if (foundBtn != NULL && foundBtn->action == CLICKME) {
+                foundElement = find_element(menu, &cursorPos);
+                if (foundElement != NULL && foundElement->action == CLICKME) {
+                    edit_element_text(renderer, foundElement, "Clicked :-)");
                     printf("clicking\n");
                 }
                 if (!simRunning && !drawing) {

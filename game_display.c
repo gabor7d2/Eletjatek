@@ -1,4 +1,5 @@
 #include "game_display.h"
+#include "sdl_utils.h"
 
 #define MIN_PADDING 10
 

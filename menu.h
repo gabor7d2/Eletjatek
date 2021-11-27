@@ -11,6 +11,6 @@ void free_menu(Menu *menu);
 
 void add_text(Menu *menu, Text *text);
 
-void add_button(Menu *menu, Button *button);
+void add_element(Menu *menu, MenuElement *element);
 
 #endif //ELETJATEK_MENU_H

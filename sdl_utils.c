@@ -32,8 +32,7 @@ void sdl_init(int width, int height, char *title, SDL_Window **pwindow, SDL_Rend
 }
 
 /**
- * A megadott 32 bites szám R, G, B és A értékeit beleírja a
- * cím szerint megadott 'color' struct-ba
+ * A megadott 32 bites szám R, G, B és A értékeit beleírja a cím szerint megadott 'color' struct-ba.
  * @param value Egy 32 bites szám, melynek bájtjai rendre az R, G, B, A értékeket határozzák meg.
  * @param color SDL_Color struct példányra mutató pointer, aminek az értékei át lesznek állítva.
  */
@@ -45,8 +44,21 @@ void set_color(Uint32 value, SDL_Color *color) {
 }
 
 /**
+ * A megadott értékeket beleírja a cím szerint megadott 'rect' struct-ba.
+ * @param rect SDL_Rect struct példányra mutató pointer, aminek az értékei át lesznek állítva.
+ */
+void set_rect(int x, int y, int w, int h, SDL_Rect *rect) {
+    rect->x = x;
+    rect->y = y;
+    rect->w = w;
+    rect->h = h;
+}
+
+/**
  * Létrehoz egy fontot a megadott betűtípus elérési út és betűméret alapján.
  * Ezen függvény hívása előtt a TTF_Init() mindenképpen történjen meg!
+ * @param fontPath A betűtípus fájl elérési útja.
+ * @param fontSize A betűtípus milyen mérettel kerüljön betöltésre.
  * @return A létrehozott font, a hívó kötelessége felszabadítani a TTF_CloseFont(); függvény hívásával.
  */
 TTF_Font *create_font(char *fontPath, int fontSize) {
@@ -63,11 +75,30 @@ TTF_Font *create_font(char *fontPath, int fontSize) {
  * A renderert szükséges renderelésre meghívni a függvény visszatérte után.
  * @param renderer A renderer.
  * @param area A terület, amit át szeretnénk színezni.
- * @param bgcolor A színezéshez használt szín.
+ * @param color A színezéshez használt szín.
  */
 void fill_rect(SDL_Renderer *renderer, SDL_Rect *area, SDL_Color color) {
     if (renderer == NULL) return;
-    boxRGBA(renderer, (short) area->x, (short) area->y, (short) (area->x + area->w - 1), (short) (area->y + area->h - 1), color.r, color.g, color.b, color.a);
+
+    boxRGBA(renderer, (short) area->x, (short) area->y,
+            (short) (area->x + area->w - 1), (short) (area->y + area->h - 1),
+            color.r, color.g, color.b, color.a);
+}
+
+/**
+ * Kitölti a megadott területet a megadott színnel.
+ * A renderert szükséges renderelésre meghívni a függvény visszatérte után.
+ * @param renderer A renderer.
+ * @param area A terület, amit át szeretnénk színezni.
+ * @param color A színezéshez használt szín.
+ * @param offset A színezni kívánt terület mennyivel legyen eltolva.
+ */
+void fill_rect_offset(SDL_Renderer *renderer, SDL_Rect *area, SDL_Color color, Vector2s offset) {
+    if (renderer == NULL) return;
+    boxRGBA(renderer,
+            (short) (area->x + offset.x), (short) (area->y + offset.y),
+            (short) (area->x + area->w + offset.x - 1), (short) (area->y + area->h + offset.y - 1),
+            color.r, color.g, color.b, color.a);
 }
 
 /**
@@ -75,6 +106,6 @@ void fill_rect(SDL_Renderer *renderer, SDL_Rect *area, SDL_Color color) {
  * @return Igaz, ha benne van, hamis, ha nincs benne.
  */
 bool inside_rect(SDL_Rect *rect, SDL_Point *point, SDL_Rect *offset) {
-    SDL_Rect offsetedRect = {.x = offset->x + rect->x, .y = offset->y + rect->y, .w = rect->w, .h = rect->h};
+    SDL_Rect offsetedRect = {offset->x + rect->x, offset->y + rect->y, rect->w, rect->h};
     return SDL_PointInRect(point, &offsetedRect);
 }
