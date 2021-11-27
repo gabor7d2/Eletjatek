@@ -11,7 +11,7 @@
 Menu *create_menu(SDL_Rect menuArea, Uint32 bgColor) {
     Menu *menu = (Menu *) malloc(sizeof(Menu));
     menu->area = menuArea;
-    menu->bgColor = create_color(bgColor);
+    set_color(bgColor, &menu->bgColor);
     menu->textCount = 0;
     menu->texts = NULL;
     menu->buttonCount = 0;
@@ -22,7 +22,7 @@ Menu *create_menu(SDL_Rect menuArea, Uint32 bgColor) {
 }
 
 void draw_menu(SDL_Renderer *renderer, Menu *menu) {
-    fill_rect(renderer, menu->area, menu->bgColor);
+    fill_rect(renderer, &menu->area, menu->bgColor);
     Vector2s offset = {.x = (short) menu->area.x, .y = (short) menu->area.y};
 
     for (int i = 0; i < menu->buttonCount; ++i) {
@@ -47,7 +47,6 @@ void free_menu(Menu *menu) {
     }
     // TODO free textfields
 
-    free(menu->bgColor);
     free(menu->texts);
     free(menu->buttons);
     free(menu->textFields);

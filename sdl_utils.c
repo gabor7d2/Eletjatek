@@ -32,16 +32,16 @@ void sdl_init(int width, int height, char *title, SDL_Window **pwindow, SDL_Rend
 }
 
 /**
- * Létrehoz egy SDL_Color példányt, ami dinamikusan van lefoglalva a memóriában.
- * @return A létrehozott struct példány, a hivó kötelessége felszabadítani.
+ * A megadott 32 bites szám R, G, B és A értékeit beleírja a
+ * cím szerint megadott 'color' struct-ba
+ * @param value Egy 32 bites szám, melynek bájtjai rendre az R, G, B, A értékeket határozzák meg.
+ * @param color SDL_Color struct példányra mutató pointer, aminek az értékei át lesznek állítva.
  */
-SDL_Color *create_color(Uint32 color) {
-    SDL_Color *c = (SDL_Color*) malloc(sizeof(SDL_Color));
-    c->r = (color >> 24) & 0xff;
-    c->g = (color >> 16) & 0xff;
-    c->b = (color >> 8) & 0xff;
-    c->a = color & 0xff;
-    return c;
+void set_color(Uint32 value, SDL_Color *color) {
+    color->r = (value >> 24) & 0xff;
+    color->g = (value >> 16) & 0xff;
+    color->b = (value >> 8) & 0xff;
+    color->a = value & 0xff;
 }
 
 /**
@@ -65,9 +65,9 @@ TTF_Font *create_font(char *fontPath, int fontSize) {
  * @param area A terület, amit át szeretnénk színezni.
  * @param bgcolor A színezéshez használt szín.
  */
-void fill_rect(SDL_Renderer *renderer, SDL_Rect area, SDL_Color *bgcolor) {
-    if (renderer == NULL || bgcolor == NULL) return;
-    boxRGBA(renderer, (short) area.x, (short) area.y, (short) (area.x + area.w - 1), (short) (area.y + area.h - 1), bgcolor->r, bgcolor->g, bgcolor->b, bgcolor->a);
+void fill_rect(SDL_Renderer *renderer, SDL_Rect *area, SDL_Color color) {
+    if (renderer == NULL) return;
+    boxRGBA(renderer, (short) area->x, (short) area->y, (short) (area->x + area->w - 1), (short) (area->y + area->h - 1), color.r, color.g, color.b, color.a);
 }
 
 /**

@@ -79,10 +79,10 @@ GridParams *create_grid_params(SDL_Rect gameArea, Vector2s cells,
 
     // Értékek előre kiszámítása és beállítása
     resize_grid_params(params, gameArea, cells);
-    params->deadColor = create_color(deadColor);
-    params->liveColor = create_color(liveColor);
-    params->borderColor = create_color(borderColor);
-    params->bgColor = create_color(bgColor);
+    set_color(deadColor, &params->deadColor);
+    set_color(liveColor, &params->liveColor);
+    set_color(borderColor, &params->borderColor);
+    set_color(bgColor, &params->bgColor);
     return params;
 }
 
@@ -91,11 +91,6 @@ GridParams *create_grid_params(SDL_Rect gameArea, Vector2s cells,
  * @param params A grid paraméterek példány.
  */
 void free_grid_params(GridParams *params) {
-    if (params == NULL) return;
-    free(params->deadColor);
-    free(params->liveColor);
-    free(params->borderColor);
-    free(params->bgColor);
     free(params);
 }
 
@@ -111,13 +106,13 @@ void draw_cells(SDL_Renderer *renderer, GridParams *params, GameField *field) {
 
     for (int x = 0; x < field->size.x; ++x) {
         for (int y = 0; y < field->size.y; ++y) {
-            SDL_Color *c = field->cells[y][x] == LIVE ? params->liveColor : params->deadColor;
+            SDL_Color c = field->cells[y][x] == LIVE ? params->liveColor : params->deadColor;
             boxRGBA(renderer,
                     (short) (x * params->cellSize.x + params->padding.x),
                     (short) (y * params->cellSize.y + params->padding.y),
                     (short) ((x + 1) * params->cellSize.x - 1 + params->padding.x),
                     (short) ((y + 1) * params->cellSize.y - 1 + params->padding.y),
-                    c->r, c->g, c->b, c->a);
+                    c.r, c.g, c.b, c.a);
         }
     }
 }
@@ -130,17 +125,17 @@ void draw_cells(SDL_Renderer *renderer, GridParams *params, GameField *field) {
  */
 void draw_grid(SDL_Renderer *renderer, GridParams *params) {
     if (renderer == NULL || params == NULL) return;
-    SDL_Color *bc = params->borderColor;
+    SDL_Color bc = params->borderColor;
 
     // Függőleges szegélyek rajzolása
     for (int x = 0; x <= params->cells.x; ++x) {
         short posX = (short) (params->cellSize.x * x + params->padding.x);
-        thickLineRGBA(renderer, posX, params->padding.y, posX, (short) (params->gridArea.h + params->padding.y), params->borderWidth.x, bc->r, bc->g, bc->b, bc->a);
+        thickLineRGBA(renderer, posX, params->padding.y, posX, (short) (params->gridArea.h + params->padding.y), params->borderWidth.x, bc.r, bc.g, bc.b, bc.a);
     }
 
     // Vízszintes szegélyek rajzolása
     for (int y = 0; y <= params->cells.y; ++y) {
         short posY = (short) (params->cellSize.y * y + params->padding.y);
-        thickLineRGBA(renderer, params->padding.x, posY, (short) (params->gridArea.w + params->padding.x), posY, params->borderWidth.y, bc->r, bc->g, bc->b, bc->a);
+        thickLineRGBA(renderer, params->padding.x, posY, (short) (params->gridArea.w + params->padding.x), posY, params->borderWidth.y, bc.r, bc.g, bc.b, bc.a);
     }
 }

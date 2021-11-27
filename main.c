@@ -4,12 +4,12 @@
 #include "game_logic.h"
 #include "file_handling.h"
 
-#define DEFAULT_WINDOW_X 1100
+#define DEFAULT_WINDOW_X 1050
 #define DEFAULT_WINDOW_Y 800
 #define MIN_WINDOW_X 600
 #define MIN_WINDOW_Y 600
 
-#define MENU_WIDTH 300
+#define MENU_WIDTH 250
 
 #define DEFAULT_CELLS_X 20
 #define DEFAULT_CELLS_Y 20
@@ -43,16 +43,15 @@ int main(int argc, char *argv[]) {
     SDL_Rect gameArea = {.x = 0, .y = 0, .w = (short) windowArea.w - MENU_WIDTH, .h = windowArea.h};
     SDL_Rect menuArea = {.x = gameArea.w, .y = 0, .w = windowArea.w - gameArea.w, .h = windowArea.h};
 
-    GridParams *gridParams = create_grid_params(gameArea, cells, 0x212121ff, 0xffb300ff, 0x424242ff, 0xfff176ff);
-    GameField *gameField = create_field(cells);
-
-    Menu *menu = create_menu(menuArea, 0x7a7a7a77);
-
     SDL_Window *window;
     SDL_Renderer *renderer;
     sdl_init(windowArea.w, windowArea.h, "Game Of Life", &window, &renderer);
     SDL_SetWindowMinimumSize(window, MIN_WINDOW_X, MIN_WINDOW_Y);
     TTF_Init();
+
+    GridParams *gridParams = create_grid_params(gameArea, cells, 0x212121ff, 0xffb300ff, 0x424242ff, 0xfff176ff);
+    GameField *gameField = create_field(cells);
+    Menu *menu = create_menu(menuArea, 0x7a7a7a77);
 
     Game game = {.renderer = renderer, .gridParams = gridParams, .gameField = gameField, .menu = menu, .windowArea = windowArea};
 
@@ -163,7 +162,7 @@ int main(int argc, char *argv[]) {
             case SDL_USEREVENT:
                 // rendering
                 if (renderNeeded) {
-                    fill_rect(renderer, windowArea, gridParams->bgColor);
+                    fill_rect(renderer, &windowArea, gridParams->bgColor);
                     draw_cells(renderer, gridParams, gameField);
                     draw_grid(renderer, gridParams);
                     draw_menu(renderer, menu);

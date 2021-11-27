@@ -39,7 +39,7 @@ typedef struct {
     SDL_Rect gameArea, gridArea;
     Vector2s borderWidth, padding, cells;
     Vector2d cellSize;
-    SDL_Color *deadColor, *liveColor, *borderColor, *bgColor;
+    SDL_Color deadColor, liveColor, borderColor, bgColor;
 } GridParams;
 
 // Struct a szimulációhoz szükséges adatok mozgatására
@@ -53,7 +53,7 @@ typedef struct {
     SDL_Rect area;
     char *text;
     TTF_Font *textFont;
-    SDL_Color *textColor;
+    SDL_Color textColor;
     SDL_Texture *texture;
 } Text;
 
@@ -73,7 +73,7 @@ typedef struct {
 
 typedef struct {
     SDL_Rect area;
-    SDL_Color *bgColor;
+    SDL_Color bgColor;
 
     int textCount;
     Text **texts;
