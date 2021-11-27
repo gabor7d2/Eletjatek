@@ -5,6 +5,7 @@
 #include <SDL2_gfxPrimitives.h>
 #include <SDL_ttf.h>
 #include <stdbool.h>
+#include "debugmalloc.h"
 
 // Enum a cellaállapotokhoz
 typedef enum {
@@ -29,12 +30,12 @@ typedef struct {
     // (a newCells tömbbe kerülnek a következő iteráció cellaértékei majd a 2 fel lesz cserélve)
     CellState **cells, **newCells;
     // Cellák mennyisége mindkét irányban
-    short sizeX, sizeY;
+    Vector2s size;
 } GameField;
 
 // Struct a grid paramétereknek
 typedef struct {
-    SDL_Rect gameArea;
+    SDL_Rect gameArea, gridArea;
     Vector2s borderWidth, padding, cells;
     Vector2d cellSize;
     SDL_Color *deadColor, *liveColor, *borderColor, *bgColor;
@@ -48,7 +49,10 @@ typedef struct {
 } SimData;
 
 typedef struct {
-    int w, h;
+    SDL_Rect area;
+    char *text;
+    TTF_Font *textFont;
+    SDL_Color *textColor;
     SDL_Texture *texture;
 } Text;
 
@@ -61,18 +65,28 @@ typedef struct {
 
 typedef struct {
     SDL_Rect area;
-    TTF_Font *font;
-    char *text;
+    Text text;
     bool hovered, clicked, selected;
+    MenuAction action;
 } TextField;
 
 typedef struct {
-    SDL_Rect *area;
+    SDL_Rect area;
     SDL_Color *bgColor;
+
     int buttonCount;
     Button **buttons;
+
     int textFieldCount;
     TextField **textFields;
 } Menu;
+
+typedef struct {
+    SDL_Renderer *renderer;
+    SDL_Rect windowArea;
+    GameField *gameField;
+    GridParams *gridParams;
+    Menu *menu;
+} Game;
 
 #endif //ELETJATEK_TYPEDEFS_H

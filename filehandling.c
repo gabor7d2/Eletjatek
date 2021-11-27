@@ -1,6 +1,5 @@
-#include "debugmalloc.h"
 #include "filehandling.h"
-#include "gamelogic.h"
+#include "game_logic.h"
 
 /**
  * Importálja a fájlban levő pályaállapotot a megadott játéktérbe.
@@ -18,7 +17,7 @@ bool import_game(char *filePath, GameField *field) {
     // Élő cellák koordinátáinak beolvasása, ameddig van adat
     int x, y;
     while (fscanf(fp, "%d:%d", &x, &y) == 2) {
-        if (x >= field->sizeX || y >= field->sizeY) continue;
+        if (x >= field->size.x || y >= field->size.y) continue;
         field->cells[y][x] = LIVE;
     }
 
@@ -37,8 +36,8 @@ bool export_game(char *filePath, GameField *field) {
     if (fp == NULL) return false;
 
     // Élő cellák koordinátáinak kiírása
-    for (int x = 0; x < field->sizeX; ++x) {
-        for (int y = 0; y < field->sizeY; ++y) {
+    for (int x = 0; x < field->size.x; ++x) {
+        for (int y = 0; y < field->size.y; ++y) {
             if (field->cells[y][x])
                 fprintf(fp, "%d:%d ", x, y);
         }

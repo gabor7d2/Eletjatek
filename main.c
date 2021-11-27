@@ -1,11 +1,7 @@
-#include <stdbool.h>
-#include <SDL.h>
-#include <SDL_ttf.h>
-
-#include "debugmalloc.h"
+#include "menu.h"
 #include "display.h"
 #include "grid_display.h"
-#include "gamelogic.h"
+#include "game_logic.h"
 #include "filehandling.h"
 
 #define DEFAULT_WINDOW_X 1100
@@ -33,7 +29,7 @@ Uint32 render_tick(Uint32 ms, void *param) {
 // Időzítő, mely változtatható gyorsaságú,
 // és a szimuláció következő iterációját számolja ki
 Uint32 sim_tick(Uint32 ms, void *param) {
-    SimData *data = (SimData*) param;
+    SimData *data = (SimData *) param;
     if (*(data->running)) {
         evolve(data->gameField);
         *(data->renderNeeded) = true;
@@ -42,37 +38,28 @@ Uint32 sim_tick(Uint32 ms, void *param) {
 }
 
 int main(int argc, char *argv[]) {
-    SDL_Rect windowArea = { .x = 0, .y = 0, .w = DEFAULT_WINDOW_X, .h = DEFAULT_WINDOW_Y };
-    Vector2s cells = { .x = DEFAULT_CELLS_X, .y = DEFAULT_CELLS_Y };
-    SDL_Rect gameArea = { .x = 0, .y = 0, .w = (short) windowArea.w - MENU_WIDTH, .h = windowArea.h };
-    SDL_Rect menuArea = { .x = gameArea.w, .y = 0, .w = windowArea.w - gameArea.w, .h = windowArea.h };
+    SDL_Rect windowArea = {.x = 0, .y = 0, .w = DEFAULT_WINDOW_X, .h = DEFAULT_WINDOW_Y};
+    Vector2s cells = {.x = DEFAULT_CELLS_X, .y = DEFAULT_CELLS_Y};
+    SDL_Rect gameArea = {.x = 0, .y = 0, .w = (short) windowArea.w - MENU_WIDTH, .h = windowArea.h};
+    SDL_Rect menuArea = {.x = gameArea.w, .y = 0, .w = windowArea.w - gameArea.w, .h = windowArea.h};
 
     GridParams *gridParams = create_grid_params(gameArea, cells, 0x212121ff, 0xffb300ff, 0x424242ff, 0xfff176ff);
-    GameField *gameField = create_field(cells.x, cells.y);
+    GameField *gameField = create_field(cells);
 
-    Menu *menu = create_menu(&menuArea, 0x7a7a7a77);
+    Menu *menu = create_menu(menuArea, 0x7a7a7a77);
 
     SDL_Window *window;
     SDL_Renderer *renderer;
     sdl_init(windowArea.w, windowArea.h, "Game Of Life", &window, &renderer);
     SDL_SetWindowMinimumSize(window, MIN_WINDOW_X, MIN_WINDOW_Y);
-
     TTF_Init();
+
+    Game game = {.renderer = renderer, .gridParams = gridParams, .gameField = gameField, .menu = menu, .windowArea = windowArea};
+
     TTF_Font *font = create_font("Chalkboard.ttf", 20);
-
-    SDL_Rect hova = { 0, 0, 0, 0 };
-    SDL_Color color = { .r = 240, .g = 60, .b = 200, .a = 255 };
-
-    SDL_Surface *felirat = TTF_RenderUTF8_Blended(font, "Game Of Life", color);
-    SDL_Texture *felirat_t = SDL_CreateTextureFromSurface(renderer, felirat);
-
-    hova.x = 875 - felirat->w / 2;
-    hova.y = 40;
-    hova.w = felirat->w;
-    hova.h = felirat->h;
-
-    SDL_Rect btnArea = { .x = 20, .y = 60, .w = 200, .h = 80 };
-    Button *btn = create_button(renderer, btnArea, CLICKME, "Click me!", font, color);
+    SDL_Color color = {.r = 240, .g = 60, .b = 200, .a = 255};
+    SDL_Rect btnArea = {.x = 20, .y = 60, .w = 200, .h = 80};
+    Button *btn = create_button(renderer, btnArea, CLICKME, "Click me!", font, &color);
     add_button(menu, btn);
 
     // Create and start render timer
@@ -85,12 +72,12 @@ int main(int argc, char *argv[]) {
     bool simRunning = false;
     bool drawing = false;
     CellState drawMode = LIVE;
-    SDL_Point prevPos = { .x = 0, .y = 0};
+    SDL_Point prevPos = {.x = 0, .y = 0};
     int simSpeedMs = DEFAULT_SIM_SPEED_MS;
     SDL_Event event;
 
     // Create simulation timer
-    SimData simData = { .running = &simRunning, .renderNeeded = &renderNeeded, .speedMs = &simSpeedMs, .gameField = gameField };
+    SimData simData = {.running = &simRunning, .renderNeeded = &renderNeeded, .speedMs = &simSpeedMs, .gameField = gameField};
     if (SDL_AddTimer(simSpeedMs, sim_tick, &simData) == 0) {
         SDL_Log("Couldn't start simulation timer: %s", SDL_GetError());
         exit(2);
@@ -180,8 +167,7 @@ int main(int argc, char *argv[]) {
                     draw_grid(renderer, gridParams);
 
                     fill_rect(renderer, &menuArea, menu->bgColor);
-                    SDL_RenderCopy(renderer, felirat_t, NULL, &hova);
-                    Vector2s offset = { .x = (short) menuArea.x, .y = (short) menuArea.y };
+                    Vector2s offset = {.x = (short) menuArea.x, .y = (short) menuArea.y};
                     draw_button(renderer, btn, &offset);
 
                     SDL_RenderPresent(renderer);
@@ -215,8 +201,6 @@ int main(int argc, char *argv[]) {
     free_field(gameField);
     free_menu(menu);
     TTF_CloseFont(font);
-    SDL_FreeSurface(felirat);
-    SDL_DestroyTexture(felirat_t);
 
     return 0;
 }

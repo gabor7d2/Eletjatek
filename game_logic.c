@@ -1,5 +1,4 @@
-#include "debugmalloc.h"
-#include "gamelogic.h"
+#include "game_logic.h"
 
 /**
  * A játéktér összes celláját halottra állítja.
@@ -7,8 +6,8 @@
  */
 void clear_cells(GameField *field) {
     if (field == NULL) return;
-    for (int x = 0; x < field->sizeX; ++x) {
-        for (int y = 0; y < field->sizeY; ++y) {
+    for (int x = 0; x < field->size.x; ++x) {
+        for (int y = 0; y < field->size.y; ++y) {
             field->cells[y][x] = DEAD;
         }
     }
@@ -26,10 +25,10 @@ CellState **create_2D_array(short sizeX, short sizeY) {
     }
 
     // Sor pointerek foglalása
-    CellState **cells = (CellState**) malloc(sizeY * sizeof(CellState*));
+    CellState **cells = (CellState **) malloc(sizeY * sizeof(CellState *));
 
     // Értékek pointerének foglalása (kilapított sor)
-    cells[0] = (CellState*) malloc(sizeX * sizeY * sizeof(CellState));
+    cells[0] = (CellState *) malloc(sizeX * sizeY * sizeof(CellState));
 
     // Minden sor pointerének beállítása a kilapított sorban megfelelőre
     for (int i = 1; i < sizeY; ++i) {
@@ -41,16 +40,14 @@ CellState **create_2D_array(short sizeX, short sizeY) {
 
 /**
  * Létrehoz egy megadott méretű játékteret.
- * @param sizeX A játéktér hány cella széles legyen.
- * @param sizeY A játéktér hány cella magas legyen.
+ * @param size A játéktér hány cella széles és magas legyen.
  * @return A létrehozott játéktér példány pointere, a hívó kötelessége felszabadítani a free_field() függvény hívásával.
  */
-GameField* create_field(short sizeX, short sizeY) {
-    GameField* field = malloc(sizeof(GameField));
-    field->sizeX = sizeX;
-    field->sizeY = sizeY;
-    field->cells = create_2D_array(sizeX, sizeY);
-    field->newCells = create_2D_array(sizeX, sizeY);
+GameField *create_field(Vector2s size) {
+    GameField *field = malloc(sizeof(GameField));
+    field->size = size;
+    field->cells = create_2D_array(size.x, size.y);
+    field->newCells = create_2D_array(size.x, size.y);
 
     // Feltöltés alapállapottal
     clear_cells(field);
@@ -63,7 +60,8 @@ GameField* create_field(short sizeX, short sizeY) {
  */
 void free_field(GameField *field) {
     if (field == NULL || field->cells == NULL || field->cells[0] == NULL ||
-    field->newCells == NULL || field->newCells[0] == NULL) return;
+        field->newCells == NULL || field->newCells[0] == NULL)
+        return;
     free(field->cells[0]);
     free(field->cells);
     free(field->newCells[0]);
@@ -88,11 +86,11 @@ void change_cell(GameField *field, GridParams *params, SDL_Point pos, CellState 
     pos.x -= params->padding.x;
     pos.y -= params->padding.y;
 
-    int cellX = pos.x / params->cellSize.x;
-    int cellY = pos.y / params->cellSize.y;
+    int cellX = (int) (pos.x / params->cellSize.x);
+    int cellY = (int) (pos.y / params->cellSize.y);
 
     // Négyzetrácson kívüli kattintás
-    if (cellX >= field->sizeX || cellY >= field->sizeY) return;
+    if (cellX >= field->size.x || cellY >= field->size.y) return;
 
     field->cells[cellY][cellX] = state;
 }
@@ -107,10 +105,10 @@ void change_cell(GameField *field, GridParams *params, SDL_Point pos, CellState 
  * @return A lekérdezett cellaérték.
  */
 CellState get_cell(GameField *field, int x, int y) {
-    if (x == -1) x = field->sizeX - 1;
-    if (y == -1) y = field->sizeY - 1;
-    if (x == field->sizeX) x = 0;
-    if (y == field->sizeY) y = 0;
+    if (x == -1) x = field->size.x - 1;
+    if (y == -1) y = field->size.y - 1;
+    if (x == field->size.x) x = 0;
+    if (y == field->size.y) y = 0;
     return field->cells[y][x];
 }
 
@@ -123,14 +121,13 @@ CellState get_cell(GameField *field, int x, int y) {
  */
 int get_neighbor_count(GameField *field, int x, int y) {
     int count = 0;
-    if (get_cell(field, x - 1, y - 1)) count++;
-    if (get_cell(field, x - 1, y)) count++;
-    if (get_cell(field, x - 1, y + 1)) count++;
-    if (get_cell(field, x, y - 1)) count++;
-    if (get_cell(field, x, y + 1)) count++;
-    if (get_cell(field, x + 1, y - 1)) count++;
-    if (get_cell(field, x + 1, y)) count++;
-    if (get_cell(field, x + 1, y + 1)) count++;
+    for (int i = x - 1; i <= x + 1; ++i) {
+        for (int j = y - 1; j <= y + 1; ++j) {
+            // Középső cellát nem kell vizsgálni
+            if (i == x && j == y) continue;
+            if (get_cell(field, i, j)) count++;
+        }
+    }
     return count;
 }
 
@@ -142,8 +139,8 @@ int get_neighbor_count(GameField *field, int x, int y) {
 void evolve(GameField *field) {
     if (field == NULL) return;
 
-    for (int x = 0; x < field->sizeX; ++x) {
-        for (int y = 0; y < field->sizeY; ++y) {
+    for (int x = 0; x < field->size.x; ++x) {
+        for (int y = 0; y < field->size.y; ++y) {
             int live_neighbors = get_neighbor_count(field, x, y);
             if ((live_neighbors == 2 && field->cells[y][x] == LIVE) || live_neighbors == 3)
                 field->newCells[y][x] = LIVE;

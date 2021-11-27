@@ -1,11 +1,11 @@
-#ifndef ELETJATEK_GAMELOGIC_H
-#define ELETJATEK_GAMELOGIC_H
+#ifndef ELETJATEK_GAME_LOGIC_H
+#define ELETJATEK_GAME_LOGIC_H
 
 #include "typedefs.h"
 
 void clear_cells(GameField *field);
 
-GameField* create_field(short sizeX, short sizeY);
+GameField *create_field(Vector2s size);
 
 void free_field(GameField *field);
 
@@ -13,4 +13,4 @@ void change_cell(GameField *field, GridParams *params, SDL_Point pos, CellState 
 
 void evolve(GameField *field);
 
-#endif //ELETJATEK_GAMELOGIC_H
+#endif //ELETJATEK_GAME_LOGIC_H
