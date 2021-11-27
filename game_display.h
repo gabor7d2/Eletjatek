@@ -1,5 +1,5 @@
-#ifndef ELETJATEK_GRID_DISPLAY_H
-#define ELETJATEK_GRID_DISPLAY_H
+#ifndef ELETJATEK_GAME_DISPLAY_H
+#define ELETJATEK_GAME_DISPLAY_H
 
 #include "typedefs.h"
 
@@ -13,4 +13,4 @@ void draw_cells(SDL_Renderer *renderer, GridParams *params, GameField *field);
 
 void draw_grid(SDL_Renderer *renderer, GridParams *params);
 
-#endif //ELETJATEK_GRID_DISPLAY_H
+#endif //ELETJATEK_GAME_DISPLAY_H

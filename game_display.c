@@ -1,5 +1,4 @@
-#include "grid_display.h"
-#include "display.h"
+#include "game_display.h"
 
 #define MIN_PADDING 10
 
@@ -24,7 +23,6 @@ int max(int x, int y) {
  * @param params A grid paraméterek példány.
  * @param gameArea A játéktér mérete pixelben (margókkal együtt).
  * @param cells A cellák száma vízszintesen és függőlegesen.
- * @param padding A játéktér margójának nagysága pixelben.
  */
 void resize_grid_params(GridParams *params, SDL_Rect gameArea, Vector2s cells) {
     params->gameArea = gameArea;

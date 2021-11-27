@@ -5,6 +5,7 @@
 #include <SDL2_gfxPrimitives.h>
 #include <SDL_ttf.h>
 #include <stdbool.h>
+#include "sdl_utils.h"
 #include "debugmalloc.h"
 
 // Enum a cellaállapotokhoz
@@ -58,14 +59,14 @@ typedef struct {
 
 typedef struct {
     SDL_Rect area;
-    Text text;
+    Text *text;
     bool hovered, clicked;
     MenuAction action;
 } Button;
 
 typedef struct {
     SDL_Rect area;
-    Text text;
+    Text *text;
     bool hovered, clicked, selected;
     MenuAction action;
 } TextField;
@@ -73,6 +74,9 @@ typedef struct {
 typedef struct {
     SDL_Rect area;
     SDL_Color *bgColor;
+
+    int textCount;
+    Text **texts;
 
     int buttonCount;
     Button **buttons;

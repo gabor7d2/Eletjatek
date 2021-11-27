@@ -1,8 +1,8 @@
 #include "menu.h"
-#include "display.h"
-#include "grid_display.h"
+#include "menu_button.h"
+#include "game_display.h"
 #include "game_logic.h"
-#include "filehandling.h"
+#include "file_handling.h"
 
 #define DEFAULT_WINDOW_X 1100
 #define DEFAULT_WINDOW_Y 800
@@ -38,8 +38,8 @@ Uint32 sim_tick(Uint32 ms, void *param) {
 }
 
 int main(int argc, char *argv[]) {
-    SDL_Rect windowArea = {.x = 0, .y = 0, .w = DEFAULT_WINDOW_X, .h = DEFAULT_WINDOW_Y};
     Vector2s cells = {.x = DEFAULT_CELLS_X, .y = DEFAULT_CELLS_Y};
+    SDL_Rect windowArea = {.x = 0, .y = 0, .w = DEFAULT_WINDOW_X, .h = DEFAULT_WINDOW_Y};
     SDL_Rect gameArea = {.x = 0, .y = 0, .w = (short) windowArea.w - MENU_WIDTH, .h = windowArea.h};
     SDL_Rect menuArea = {.x = gameArea.w, .y = 0, .w = windowArea.w - gameArea.w, .h = windowArea.h};
 
@@ -57,29 +57,30 @@ int main(int argc, char *argv[]) {
     Game game = {.renderer = renderer, .gridParams = gridParams, .gameField = gameField, .menu = menu, .windowArea = windowArea};
 
     TTF_Font *font = create_font("Chalkboard.ttf", 20);
-    SDL_Color color = {.r = 240, .g = 60, .b = 200, .a = 255};
     SDL_Rect btnArea = {.x = 20, .y = 60, .w = 200, .h = 80};
-    Button *btn = create_button(renderer, btnArea, CLICKME, "Click me!", font, &color);
+    Button *btn = create_button(renderer, btnArea, CLICKME, "Click me!", font, 0xee70ccff);
     add_button(menu, btn);
 
     // Create and start render timer
     if (SDL_AddTimer(FRAMETIME_MS, render_tick, NULL) == 0) {
-        SDL_Log("Couldn't start render timer: %s", SDL_GetError());
+        SDL_Log("FATAL: Couldn't start render timer: %s", SDL_GetError());
         exit(2);
     }
 
     bool renderNeeded = true;
     bool simRunning = false;
+    int simSpeedMs = DEFAULT_SIM_SPEED_MS;
+
     bool drawing = false;
     CellState drawMode = LIVE;
-    SDL_Point prevPos = {.x = 0, .y = 0};
-    int simSpeedMs = DEFAULT_SIM_SPEED_MS;
+    SDL_Point cursorPos = {.x = 0, .y = 0};
+
     SDL_Event event;
 
     // Create simulation timer
     SimData simData = {.running = &simRunning, .renderNeeded = &renderNeeded, .speedMs = &simSpeedMs, .gameField = gameField};
     if (SDL_AddTimer(simSpeedMs, sim_tick, &simData) == 0) {
-        SDL_Log("Couldn't start simulation timer: %s", SDL_GetError());
+        SDL_Log("FATAL: Couldn't start simulation timer: %s", SDL_GetError());
         exit(2);
     }
 
@@ -88,9 +89,9 @@ int main(int argc, char *argv[]) {
     while (SDL_WaitEvent(&event) && event.type != SDL_QUIT) {
         switch (event.type) {
             case SDL_MOUSEBUTTONDOWN:
-                prevPos.x = event.button.x;
-                prevPos.y = event.button.y;
-                foundBtn = find_button(menu, &prevPos);
+                cursorPos.x = event.button.x;
+                cursorPos.y = event.button.y;
+                foundBtn = find_button(menu, &cursorPos);
                 if (foundBtn != NULL && foundBtn->action == CLICKME) {
                     printf("clicking\n");
                 }
@@ -104,22 +105,22 @@ int main(int argc, char *argv[]) {
             case SDL_MOUSEBUTTONUP:
                 if (drawing) {
                     if (event.button.button == SDL_BUTTON_LEFT || event.button.button == SDL_BUTTON_RIGHT) {
-                        change_cell(gameField, gridParams, prevPos, drawMode);
+                        change_cell(gameField, gridParams, cursorPos, drawMode);
                         renderNeeded = true;
                         drawing = false;
                     }
                 }
                 break;
             case SDL_MOUSEMOTION:
-                /*if (find_button(menu, &prevPos) != NULL) {
+                /*if (find_button(menu, &cursorPos) != NULL) {
                     printf("hovering\n");
                 }*/
                 if (drawing) {
-                    change_cell(gameField, gridParams, prevPos, drawMode);
+                    change_cell(gameField, gridParams, cursorPos, drawMode);
                     renderNeeded = true;
                 }
-                prevPos.x = event.motion.x;
-                prevPos.y = event.motion.y;
+                cursorPos.x = event.motion.x;
+                cursorPos.y = event.motion.y;
                 break;
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym) {
@@ -162,13 +163,10 @@ int main(int argc, char *argv[]) {
             case SDL_USEREVENT:
                 // rendering
                 if (renderNeeded) {
-                    fill_rect(renderer, &windowArea, gridParams->bgColor);
+                    fill_rect(renderer, windowArea, gridParams->bgColor);
                     draw_cells(renderer, gridParams, gameField);
                     draw_grid(renderer, gridParams);
-
-                    fill_rect(renderer, &menuArea, menu->bgColor);
-                    Vector2s offset = {.x = (short) menuArea.x, .y = (short) menuArea.y};
-                    draw_button(renderer, btn, &offset);
+                    draw_menu(renderer, menu);
 
                     SDL_RenderPresent(renderer);
                     renderNeeded = false;
@@ -183,9 +181,9 @@ int main(int argc, char *argv[]) {
                     windowArea.h = (short) event.window.data2;
                     gameArea.w = (short) windowArea.w - MENU_WIDTH;
                     gameArea.h = windowArea.h;
-                    menuArea.x = gameArea.w;
-                    menuArea.w = windowArea.w - gameArea.w;
-                    menuArea.h = windowArea.h;
+                    menu->area.x = gameArea.w;
+                    menu->area.w = windowArea.w - gameArea.w;
+                    menu->area.h = windowArea.h;
                     resize_grid_params(gridParams, gameArea, cells);
                     renderNeeded = true;
                     printf("size changed: %d, %d\n", event.window.data1, event.window.data2);
