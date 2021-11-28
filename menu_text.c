@@ -4,6 +4,7 @@
 Text *create_text(SDL_Renderer *renderer, SDL_Rect area, char *text, TTF_Font *textFont, Uint32 textColor) {
     Text *txt = (Text*) malloc(sizeof(Text));
     txt->textFont = textFont;
+    txt->text = NULL;
     txt->texture = NULL;
     set_color(textColor, &txt->textColor);
     edit_text(renderer, txt, area, text);
@@ -18,7 +19,12 @@ void edit_text(SDL_Renderer *renderer, Text *text, SDL_Rect area, char *newText)
 
     SDL_Rect txtArea = {.x = area.x + area.w / 2 - surface->w / 2, .y = area.y + area.h / 2 - surface->h / 2, .w = surface->w, .h = surface->h};
     text->area = txtArea;
-    text->text = newText;
+
+    if (text->text != NULL)
+        free(text->text);
+    text->text = (char *) malloc(sizeof(char) * (strlen(newText) + 1));
+    strcpy(text->text, newText);
+
     SDL_DestroyTexture(text->texture);
     text->texture = surface_texture;
 }
@@ -30,5 +36,6 @@ void draw_text(SDL_Renderer *renderer, Text *text, Vector2s offset) {
 
 void free_text(Text *text) {
     SDL_DestroyTexture(text->texture);
+    free(text->text);
     free(text);
 }

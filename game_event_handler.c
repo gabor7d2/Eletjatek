@@ -6,6 +6,25 @@
 #include "file_handling.h"
 #include "sdl_utils.h"
 
+void resize_game(Game *game, MenuAction action) {
+    Vector2s size = game->gameField->size;
+
+    if (action == INC_CELLS_X)
+        size.x++;
+    else if (action == DEC_CELLS_X)
+        size.x--;
+    if (action == INC_CELLS_Y)
+        size.y++;
+    else if (action == DEC_CELLS_Y)
+        size.y--;
+
+    if (size.x < 1) size.x = 1;
+    if (size.y < 1) size.y = 1;
+
+    resize_field(game->gameField, size);
+    resize_grid_params(game->gridParams, game->gridParams->gameArea, size);
+}
+
 void process_element_click(Game *game, SDL_Event *event, MenuElement *element) {
     switch (element->action) {
         case AUTO_STEP_TOGGLE:
@@ -19,7 +38,7 @@ void process_element_click(Game *game, SDL_Event *event, MenuElement *element) {
                 evolve(game->gameField);
             break;
         case CLEAR:
-            if (!game->simRunning && !game->drawing)
+            if (!game->drawing && !game->simRunning)
                 clear_cells(game->gameField);
             break;
         case IMPORT:
@@ -30,6 +49,27 @@ void process_element_click(Game *game, SDL_Event *event, MenuElement *element) {
             if (!game->drawing && !game->simRunning)
                 export_game("palya.dat", game->gameField);
             break;
+        case INC_SPEED:
+            if (game->simSpeedMs >= 10)
+                game->simSpeedMs -= 10;
+            else game->simSpeedMs = 1;
+            break;
+        case DEC_SPEED:
+            if (game->simSpeedMs <= 996)
+                game->simSpeedMs += 10;
+            else game->simSpeedMs = 996;
+            break;
+        case INC_CELLS_X:
+        case DEC_CELLS_X:
+        case INC_CELLS_Y:
+        case DEC_CELLS_Y:
+            resize_game(game, element->action);
+            break;
+        /*case EDIT_FILE:
+        case EDIT_SPEED:
+        case EDIT_CELLS_X:
+        case EDIT_CELLS_Y:
+            break;*/
     }
 }
 
@@ -78,20 +118,12 @@ void mouse_motion(Game *game, SDL_Event *event) {
 void key_down(Game *game, SDL_Event *event) {
     printf("keydown\n");
     switch (event->key.keysym.sym) {
-        case SDLK_UP:
-            if (game->simSpeedMs >= 10)
-                game->simSpeedMs -= 10;
-            break;
-        case SDLK_DOWN:
-            if (game->simSpeedMs <= 491)
-                game->simSpeedMs += 10;
-            break;
-            // todo resize
+
     }
 }
 
 void text_input(Game *game, SDL_Event *event) {
-    printf("textinput: %lu\n", strlen(event->text.text));
+    printf("textinput: %s (%lu)\n", event->text.text, strlen(event->text.text));
 }
 
 void user_event(Game *game, SDL_Event *event) {
@@ -107,8 +139,6 @@ void user_event(Game *game, SDL_Event *event) {
 
 void window_event(Game *game, SDL_Event *event) {
     // window resize
-    if (event->window.event == SDL_WINDOWEVENT_RESIZED)
-        printf("resized: %d, %d\n", event->window.data1, event->window.data2);
     if (event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
         // update window area
         game->windowArea.w = (short) event->window.data1;
@@ -125,6 +155,5 @@ void window_event(Game *game, SDL_Event *event) {
         game->menu->area.h = game->windowArea.h;
 
         resize_grid_params(game->gridParams, gameArea, game->gameField->size);
-        printf("size changed: %d, %d\n", event->window.data1, event->window.data2);
     }
 }

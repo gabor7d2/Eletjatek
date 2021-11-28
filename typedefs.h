@@ -14,8 +14,8 @@
 
 #define MENU_WIDTH 250
 
-#define DEFAULT_CELLS_X 20
-#define DEFAULT_CELLS_Y 20
+#define DEFAULT_CELLS_X 40
+#define DEFAULT_CELLS_Y 40
 #define FRAMETIME_MS 20
 #define DEFAULT_SIM_SPEED_MS 101
 
@@ -25,7 +25,11 @@ typedef enum CellState {
 } CellState;
 
 typedef enum MenuAction {
-    AUTO_STEP_TOGGLE, STEP, CLEAR, IMPORT, EXPORT
+    AUTO_STEP_TOGGLE, STEP, CLEAR,
+    IMPORT, EXPORT, EDIT_FILE,
+    INC_SPEED, DEC_SPEED, EDIT_SPEED,
+    INC_CELLS_X, DEC_CELLS_X, EDIT_CELLS_X,
+    INC_CELLS_Y, DEC_CELLS_Y, EDIT_CELLS_Y
 } MenuAction;
 
 typedef enum MenuElementType {

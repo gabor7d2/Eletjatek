@@ -4,6 +4,7 @@
 #include "game_logic.h"
 #include "sdl_utils.h"
 #include "game_event_handler.h"
+#include "menu_text.h"
 
 // SDL kezeléséhez használt dokumentáció: https://infoc.eet.bme.hu/sdl/
 
@@ -47,26 +48,62 @@ Game init() {
 
 // Felépíti a menü elemeit, szövegeket, gombokat, szövegmezőket.
 void build_menu(Game *game) {
-    TTF_Font *font = create_font("Chalkboard.ttf", 20);
+    TTF_Font *normalFont = create_font("Chalkboard.ttf", 20);
+    TTF_Font *smallFont = create_font("Chalkboard.ttf", 16);
+    TTF_Font *midFont = create_font("Chalkboard.ttf", 18);
+
+    MenuElementColors btnColors;
+    set_menu_element_colors(0xcccccc7f, 0x505050ff, 0x28282800, 0x00, &btnColors);
     Uint32 textColor = 0xffffffff;
-    MenuElementColors colors;
-    set_menu_element_colors(0xcccccc7f, 0x505050ff, 0x28282800, 0xffffffff, &colors);
-    SDL_Rect btnArea;
+    SDL_Rect area;
 
-    set_rect(25, 60, 200, 60, &btnArea);
-    add_element(game->menu, create_button(game->renderer, btnArea, AUTO_STEP_TOGGLE, "Auto léptetés BE", font, textColor, colors));
+    set_rect(25, 30, 200, 60, &area);
+    add_element(game->menu, create_button(game->renderer, area, AUTO_STEP_TOGGLE, "Auto léptetés BE", normalFont, textColor, btnColors));
 
-    set_rect(25, 140, 200, 60, &btnArea);
-    add_element(game->menu, create_button(game->renderer, btnArea, STEP, "Léptetés", font, textColor, colors));
+    set_rect(25, 110, 200, 60, &area);
+    add_element(game->menu, create_button(game->renderer, area, STEP, "Léptetés", normalFont, textColor, btnColors));
 
-    set_rect(25, 220, 200, 60, &btnArea);
-    add_element(game->menu, create_button(game->renderer, btnArea, CLEAR, "Törlés", font, textColor, colors));
+    set_rect(25, 190, 200, 60, &area);
+    add_element(game->menu, create_button(game->renderer, area, CLEAR, "Törlés", normalFont, textColor, btnColors));
 
-    set_rect(25, 300, 200, 60, &btnArea);
-    add_element(game->menu, create_button(game->renderer, btnArea, IMPORT, "Import", font, textColor, colors));
+    set_rect(35, 280, 80, 40, &area);
+    add_element(game->menu, create_button(game->renderer, area, IMPORT, "Import", smallFont, textColor, btnColors));
 
-    set_rect(25, 380, 200, 60, &btnArea);
-    add_element(game->menu, create_button(game->renderer, btnArea, EXPORT, "Export", font, textColor, colors));
+    set_rect(135, 280, 80, 40, &area);
+    add_element(game->menu, create_button(game->renderer, area, EXPORT, "Export", smallFont, textColor, btnColors));
+
+    set_rect(40, 350, 40, 40, &area);
+    add_element(game->menu, create_button(game->renderer, area, DEC_SPEED, "-", smallFont, textColor, btnColors));
+
+    set_rect(170, 350, 40, 40, &area);
+    add_element(game->menu, create_button(game->renderer, area, INC_SPEED, "+", smallFont, textColor, btnColors));
+
+    set_rect(40, 420, 40, 40, &area);
+    add_element(game->menu, create_button(game->renderer, area, DEC_CELLS_X, "-", smallFont, textColor, btnColors));
+
+    set_rect(170, 420, 40, 40, &area);
+    add_element(game->menu, create_button(game->renderer, area, INC_CELLS_X, "+", smallFont, textColor, btnColors));
+
+    set_rect(40, 465, 40, 40, &area);
+    add_element(game->menu, create_button(game->renderer, area, DEC_CELLS_Y, "-", smallFont, textColor, btnColors));
+
+    set_rect(170, 465, 40, 40, &area);
+    add_element(game->menu, create_button(game->renderer, area, INC_CELLS_Y, "+", smallFont, textColor, btnColors));
+
+    textColor = 0x1f1f1fff;
+    set_rect(80, 350, 90, 40, &area);
+    add_text(game->menu, create_text(game->renderer, area, "Sebesség", midFont, textColor));
+    set_rect(80, 420, 90, 40, &area);
+    add_text(game->menu, create_text(game->renderer, area, "Oszlopok", midFont, textColor));
+    set_rect(80, 465, 90, 40, &area);
+    add_text(game->menu, create_text(game->renderer, area, "Sorok", midFont, textColor));
+
+    /*Uint32 tfTextColor = 0x000000ff;
+    MenuElementColors tfColors;
+    set_menu_element_colors(0x111111ff, 0xbbbbbbff, 0x77777700, 0xffffffff, &tfColors);
+
+    set_rect(25, 290, 200, 40, &area);
+    add_element(game->menu, create_button(game->renderer, area, EDIT_FILE, "palya.dat", smallFont, tfTextColor, tfColors));*/
 }
 
 // Elindítja az időzítőket.
@@ -113,7 +150,6 @@ void forward_event(Game *game, SDL_Event *event) {
 
 // Felszabadítja a program memóriafoglalásait.
 void end(Game *game) {
-    // TODO free fonts
     sdl_exit(&game->window, &game->renderer);
 
     // felszabadítás

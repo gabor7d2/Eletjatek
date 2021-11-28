@@ -17,6 +17,13 @@ void clear_cells(GameField *field);
 GameField *create_field(Vector2s size);
 
 /**
+ * Átméretezi a megadott játékteret.
+ * @param field A játéktér.
+ * @param newSize Az új méret (cellák mennyisége mindkét irányban).
+ */
+void resize_field(GameField *field, Vector2s newSize);
+
+/**
  * Felszabadítja a memóriából a megadott játékteret.
  * @param field A játéktér.
  */

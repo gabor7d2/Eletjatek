@@ -36,13 +36,27 @@ CellState **create_2D_array(short sizeX, short sizeY) {
 
 GameField *create_field(Vector2s size) {
     GameField *field = malloc(sizeof(GameField));
-    field->size = size;
-    field->cells = create_2D_array(size.x, size.y);
-    field->newCells = create_2D_array(size.x, size.y);
+    field->cells = NULL;
+    field->newCells = NULL;
+    resize_field(field, size);
+    return field;
+}
+
+void resize_field(GameField *field, Vector2s newSize) {
+    // TODO remember previous cell data
+    if (field->cells != NULL) {
+        free(field->cells[0]);
+        free(field->cells);
+        free(field->newCells[0]);
+        free(field->newCells);
+    }
+
+    field->size = newSize;
+    field->cells = create_2D_array(newSize.x, newSize.y);
+    field->newCells = create_2D_array(newSize.x, newSize.y);
 
     // Feltöltés alapállapottal
     clear_cells(field);
-    return field;
 }
 
 void free_field(GameField *field) {
