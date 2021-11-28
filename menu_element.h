@@ -53,4 +53,14 @@ void draw_element(SDL_Renderer *renderer, MenuElement *element, Vector2s offset)
  */
 void free_element(MenuElement *element);
 
+/**
+ * Beállítja a 'colors' struct értékeit a megadott értékekre.
+ * @param edgeColor A menüelem szélének a színe.
+ * @param normalColor A menüelem háttérszíne normál állapotban.
+ * @param interactColor A menüelem háttérszíne amikor a kurzor felette van, vagy meg van nyomva.
+ * @param selectColor A menüelem háttérszíne, amikor ki van választva (szövegmezőnél használt).
+ * @param colors A struct, aminek az értékei változni fognak.
+ */
+void set_menu_element_colors(Uint32 edgeColor, Uint32 normalColor, Uint32 interactColor, Uint32 selectColor, MenuElementColors *colors);
+
 #endif //ELETJATEK_MENU_ELEMENT_H

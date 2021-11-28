@@ -23,14 +23,11 @@ GameField *create_field(Vector2s size);
 void free_field(GameField *field);
 
 /**
- * Kiszámítja, hogy a megadott x és y képernyőkoordinátákon melyik cella van,
+ * Kiszámítja, hogy a jelenlegi x és y kurzor pozíción melyik cella van,
  * és megváltoztatja annak állapotát a megadott állapotra.
- * @param field A játéktér.
- * @param params A grid paraméterek.
- * @param pos A változtatni kívánt cella képernyőkoordinátái.
- * @param state A változtatni kívánt cella új állapota.
+ * @param game A játék példány.
  */
-void change_cell(GameField *field, GridParams *params, SDL_Point pos, CellState state);
+void change_cell(Game *game);
 
 /**
  * A játéktér következő iterációját kiszámolja a newCells tömbben,

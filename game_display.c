@@ -86,13 +86,15 @@ void draw_cells(SDL_Renderer *renderer, GridParams *params, GameField *field) {
 
     for (int x = 0; x < field->size.x; ++x) {
         for (int y = 0; y < field->size.y; ++y) {
-            SDL_Color c = field->cells[y][x] == LIVE ? params->liveColor : params->deadColor;
+            SDL_Color color = field->cells[y][x] == LIVE ? params->liveColor : params->deadColor;
+            /*SDL_Rect area = {x * params->cellSize.x, y * params->cellSize.y, params->cellSize.x, params->cellSize.y};
+            fill_rect_offset(renderer, &area, color, params->padding);*/
             boxRGBA(renderer,
                     (short) (x * params->cellSize.x + params->padding.x),
                     (short) (y * params->cellSize.y + params->padding.y),
                     (short) ((x + 1) * params->cellSize.x - 1 + params->padding.x),
                     (short) ((y + 1) * params->cellSize.y - 1 + params->padding.y),
-                    c.r, c.g, c.b, c.a);
+                    color.r, color.g, color.b, color.a);
         }
     }
 }
@@ -120,7 +122,7 @@ void draw_grid(SDL_Renderer *renderer, GridParams *params) {
     }
 }
 
-void draw_game(SDL_Renderer *renderer, GridParams *params, GameField *field) {
-    draw_cells(renderer, params, field);
-    draw_grid(renderer, params);
+void draw_game(Game *game) {
+    draw_cells(game->renderer, game->gridParams, game->gameField);
+    draw_grid(game->renderer, game->gridParams);
 }

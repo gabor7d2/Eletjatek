@@ -45,7 +45,8 @@ void add_element(Menu *menu, MenuElement *element);
  * vagy NULL-ra, ha nincs találat.
  * @param menu A menü.
  * @param point A képernyőkoordináták.
+ * @return A megtalált menüelem pointere, vagy NULL, ha nincs találat.
  */
-void find_element(Menu *menu, SDL_Point *point);
+MenuElement *find_element(Menu *menu, SDL_Point point);
 
 #endif //ELETJATEK_MENU_H

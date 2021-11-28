@@ -33,10 +33,8 @@ void free_grid_params(GridParams *params);
  * Kirajzolja a játéktér celláit és a köztük levő szegélyeket.
  * Hívása előtt szükséges törölni a játéktér korábbi tartalmát, és
  * a renderert szükséges renderelésre meghívni a függvény visszatérte után.
- * @param renderer A renderer.
- * @param params A grid paraméterek.
- * @param field A játéktér.
+ * @param game A játék példány.
  */
-void draw_game(SDL_Renderer *renderer, GridParams *params, GameField *field);
+void draw_game(Game *game);
 
 #endif //ELETJATEK_GAME_DISPLAY_H

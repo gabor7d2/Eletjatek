@@ -55,15 +55,12 @@ TTF_Font *create_font(char *fontPath, int fontSize) {
 }
 
 void fill_rect(SDL_Renderer *renderer, SDL_Rect *area, SDL_Color color) {
-    if (renderer == NULL) return;
-
     boxRGBA(renderer, (short) area->x, (short) area->y,
             (short) (area->x + area->w - 1), (short) (area->y + area->h - 1),
             color.r, color.g, color.b, color.a);
 }
 
 void fill_rect_offset(SDL_Renderer *renderer, SDL_Rect *area, SDL_Color color, Vector2s offset) {
-    if (renderer == NULL) return;
     boxRGBA(renderer,
             (short) (area->x + offset.x), (short) (area->y + offset.y),
             (short) (area->x + area->w + offset.x - 1), (short) (area->y + area->h + offset.y - 1),

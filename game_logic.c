@@ -56,7 +56,11 @@ void free_field(GameField *field) {
     free(field);
 }
 
-void change_cell(GameField *field, GridParams *params, SDL_Point pos, CellState state) {
+void change_cell(Game *game) {
+    GameField *field = game->gameField;
+    GridParams *params = game->gridParams;
+    SDL_Point pos = game->cursorPos;
+
     if (field == NULL || params == NULL) return;
 
     // Négyzetrácson kívüli kattintás
@@ -71,7 +75,7 @@ void change_cell(GameField *field, GridParams *params, SDL_Point pos, CellState 
     // Négyzetrácson kívüli kattintás
     if (cellX >= field->size.x || cellY >= field->size.y) return;
 
-    field->cells[cellY][cellX] = state;
+    field->cells[cellY][cellX] = game->drawMode;
 }
 
 /**

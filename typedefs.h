@@ -7,6 +7,18 @@
 #include <stdbool.h>
 #include "debugmalloc.h"
 
+#define DEFAULT_WINDOW_X 1050
+#define DEFAULT_WINDOW_Y 800
+#define MIN_WINDOW_X 600
+#define MIN_WINDOW_Y 600
+
+#define MENU_WIDTH 250
+
+#define DEFAULT_CELLS_X 20
+#define DEFAULT_CELLS_Y 20
+#define FRAMETIME_MS 20
+#define DEFAULT_SIM_SPEED_MS 101
+
 // Enum a cellaállapotokhoz
 typedef enum CellState {
     DEAD, LIVE
@@ -45,13 +57,6 @@ typedef struct GridParams {
     SDL_Color deadColor, liveColor, borderColor, bgColor;
 } GridParams;
 
-// Struct a szimulációhoz szükséges adatok mozgatására
-typedef struct SimData {
-    bool *running;
-    int *speedMs;
-    GameField *gameField;
-} SimData;
-
 typedef struct Text {
     SDL_Rect area;
     char *text;
@@ -61,8 +66,8 @@ typedef struct Text {
 } Text;
 
 typedef struct {
-    /* @param edgeColor A menüelem szélének a színe.
-    * @param normalColor A menüelem háttérszíne normál állapotban.
+    /* @param edgeColor
+    * @param normalColor
     * @param hoverColor A menüelem háttérszíne amikor a kurzor felette van, vagy meg van nyomva.*/
     SDL_Color edgeColor, normalColor, interactColor, selectColor;
 } MenuElementColors;
@@ -92,10 +97,16 @@ typedef struct Menu {
 
 typedef struct Game {
     SDL_Renderer *renderer;
+    SDL_Window *window;
     SDL_Rect windowArea;
     GameField *gameField;
     GridParams *gridParams;
     Menu *menu;
+
+    int simSpeedMs;
+    bool simRunning, drawing;
+    CellState drawMode;
+    SDL_Point cursorPos;
 } Game;
 
 #endif //ELETJATEK_TYPEDEFS_H

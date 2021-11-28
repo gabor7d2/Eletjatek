@@ -43,3 +43,10 @@ void draw_element(SDL_Renderer *renderer, MenuElement *element, Vector2s offset)
 void free_element(MenuElement *element) {
     free(element);
 }
+
+void set_menu_element_colors(Uint32 edgeColor, Uint32 normalColor, Uint32 interactColor, Uint32 selectColor, MenuElementColors *colors) {
+    set_color(edgeColor, &colors->edgeColor);
+    set_color(normalColor, &colors->normalColor);
+    set_color(interactColor, &colors->interactColor);
+    set_color(selectColor, &colors->selectColor);
+}

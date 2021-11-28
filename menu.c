@@ -70,12 +70,13 @@ void add_element(Menu *menu, MenuElement *element) {
     add_text(menu, element->text);
 }
 
-void find_element(Menu *menu, SDL_Point *point) {
+MenuElement *find_element(Menu *menu, SDL_Point point) {
     for (int i = 0; i < menu->elementCount; ++i) {
-        if (inside_rect(&menu->elements[i]->area, point, &menu->area)) {
+        if (inside_rect(&menu->elements[i]->area, &point, &menu->area)) {
             menu->foundElement = menu->elements[i];
-            return;
+            return menu->foundElement;
         }
     }
     menu->foundElement = NULL;
+    return NULL;
 }
