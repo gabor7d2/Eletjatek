@@ -17,10 +17,25 @@ Menu *create_menu(SDL_Rect menuArea, Uint32 bgColor) {
     menu->texts = NULL;
     menu->elementCount = 0;
     menu->elements = NULL;
+    menu->foundElement = NULL;
+    menu->selTextField = NULL;
     return menu;
 }
 
+void calc_interact_alphas(Menu *menu) {
+    for (int i = 0; i < menu->elementCount; ++i) {
+        MenuElement *element = menu->elements[i];
+        if (element == menu->foundElement) {
+            if (element->interactAlpha < 120) element->interactAlpha += 15;
+        } else {
+            if (element->interactAlpha > 0) element->interactAlpha -= 15;
+        }
+    }
+}
+
 void draw_menu(SDL_Renderer *renderer, Menu *menu) {
+    calc_interact_alphas(menu);
+
     fill_rect(renderer, &menu->area, menu->bgColor);
     Vector2s offset = {.x = (short) menu->area.x, .y = (short) menu->area.y};
 
@@ -69,4 +84,21 @@ void add_element(Menu *menu, MenuElement *element) {
     menu->elements = (MenuElement **) realloc(menu->elements, sizeof(MenuElement *) * (menu->elementCount + 1));
     menu->elements[menu->elementCount++] = element;
     add_text(menu, element->text);
+}
+
+/**
+ * Megkeresi az első menüelemet, ami a megadott képernyőkoordinátákon van
+ * és a Menu struct foundElement értékét átállítja a talált elem pointerére,
+ * vagy NULL-ra, ha nincs találat.
+ * @param menu A menü.
+ * @param point A képernyőkoordináták.
+ */
+void find_element(Menu *menu, SDL_Point *point) {
+    for (int i = 0; i < menu->elementCount; ++i) {
+        if (inside_rect(&menu->elements[i]->area, point, &menu->area)) {
+            menu->foundElement = menu->elements[i];
+            return;
+        }
+    }
+    menu->foundElement = NULL;
 }

@@ -13,4 +13,6 @@ void add_text(Menu *menu, Text *text);
 
 void add_element(Menu *menu, MenuElement *element);
 
+void find_element(Menu *menu, SDL_Point *point);
+
 #endif //ELETJATEK_MENU_H

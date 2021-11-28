@@ -31,10 +31,8 @@ Uint32 render_tick(Uint32 ms, void *param) {
 // és a szimuláció következő iterációját számolja ki
 Uint32 sim_tick(Uint32 ms, void *param) {
     SimData *data = (SimData *) param;
-    if (*(data->running)) {
+    if (*(data->running))
         evolve(data->gameField);
-        *(data->renderNeeded) = true;
-    }
     return *(data->speedMs);
 }
 
@@ -70,9 +68,14 @@ int main(int argc, char *argv[]) {
     // TODO unify color format
     MenuElementColors colors = {200, 200, 200, 127,
                                 80, 80, 80, 255,
-                                20, 20, 20, 0};
+                                40, 40, 40, 0,
+                                255, 255, 255, 255};
     SDL_Rect btnArea;
     set_rect(20, 60, 200, 80, &btnArea);
+    add_element(menu, create_button(renderer, btnArea, CLICKME, "Click me!", font, textColor, colors));
+    set_rect(20, 160, 200, 80, &btnArea);
+    add_element(menu, create_button(renderer, btnArea, CLICKME, "Click me!", font, textColor, colors));
+    set_rect(20, 260, 200, 80, &btnArea);
     add_element(menu, create_button(renderer, btnArea, CLICKME, "Click me!", font, textColor, colors));
 
     // Create and start render timer
@@ -81,7 +84,6 @@ int main(int argc, char *argv[]) {
         exit(2);
     }
 
-    bool renderNeeded = true;
     bool simRunning = false;
     int simSpeedMs = DEFAULT_SIM_SPEED_MS;
 
@@ -92,13 +94,12 @@ int main(int argc, char *argv[]) {
     SDL_Event event;
 
     // Create simulation timer
-    SimData simData = {.running = &simRunning, .renderNeeded = &renderNeeded, .speedMs = &simSpeedMs, .gameField = gameField};
+    SimData simData = {.running = &simRunning, .speedMs = &simSpeedMs, .gameField = gameField};
     if (SDL_AddTimer(simSpeedMs, sim_tick, &simData) == 0) {
         SDL_Log("FATAL: Couldn't start simulation timer: %s", SDL_GetError());
         exit(2);
     }
 
-    MenuElement *foundElement;
     // Main event loop
     // TODO separate event handler file
     while (SDL_WaitEvent(&event) && event.type != SDL_QUIT) {
@@ -106,10 +107,12 @@ int main(int argc, char *argv[]) {
             case SDL_MOUSEBUTTONDOWN:
                 cursorPos.x = event.button.x;
                 cursorPos.y = event.button.y;
-                foundElement = find_element(menu, &cursorPos);
-                if (foundElement != NULL && foundElement->action == CLICKME) {
-                    edit_element_text(renderer, foundElement, "Clicked :-)");
-                    printf("clicking\n");
+                find_element(menu, &cursorPos);
+                if (menu->foundElement != NULL)
+                    menu->foundElement->clicked = true;
+                if (menu->foundElement != NULL && menu->foundElement->action == CLICKME) {
+                    edit_element_text(renderer, menu->foundElement, "Clicked :-)");
+                    printf("clicked\n");
                 }
                 if (!simRunning && !drawing) {
                     if (event.button.button == SDL_BUTTON_RIGHT || event.button.button == SDL_BUTTON_LEFT) {
@@ -119,32 +122,33 @@ int main(int argc, char *argv[]) {
                 }
                 break;
             case SDL_MOUSEBUTTONUP:
+                if (menu->foundElement != NULL) {
+                    menu->foundElement->clicked = false;
+                    find_element(menu, &cursorPos);
+                }
                 if (drawing) {
-                    if (event.button.button == SDL_BUTTON_LEFT || event.button.button == SDL_BUTTON_RIGHT) {
+                    if (event.button.button == SDL_BUTTON_LEFT || event.button.button == SDL_BUTTON_RIGHT)
                         change_cell(gameField, gridParams, cursorPos, drawMode);
-                        renderNeeded = true;
-                        drawing = false;
-                    }
+                    drawing = false;
                 }
                 break;
             case SDL_MOUSEMOTION:
-                /*if (find_button(menu, &cursorPos) != NULL) {
-                    printf("hovering\n");
-                }*/
-                if (drawing) {
+                if (menu->foundElement == NULL || !menu->foundElement->clicked)
+                    find_element(menu, &cursorPos);
+                if (drawing)
                     change_cell(gameField, gridParams, cursorPos, drawMode);
-                    renderNeeded = true;
-                }
                 cursorPos.x = event.motion.x;
                 cursorPos.y = event.motion.y;
                 break;
             case SDL_KEYDOWN:
+                if (menu->selTextField) {
+
+                }
+                printf("keydown\n");
                 switch (event.key.keysym.sym) {
                     case SDLK_c:
-                        if (!simRunning && !drawing) {
+                        if (!simRunning && !drawing)
                             clear_cells(gameField);
-                            renderNeeded = true;
-                        }
                         break;
                     case SDLK_SPACE:
                         if (!drawing)
@@ -157,36 +161,27 @@ int main(int argc, char *argv[]) {
                         if (simSpeedMs <= 491) simSpeedMs += 10;
                         break;
                     case SDLK_RETURN:
-                        if (!drawing && !simRunning) {
+                        if (!drawing && !simRunning)
                             evolve(gameField);
-                            renderNeeded = true;
-                        }
                         break;
                     case SDLK_e:
-                        if (!drawing && !simRunning) {
+                        if (!drawing && !simRunning)
                             export_game("palya.dat", gameField);
-                        }
                         break;
                     case SDLK_i:
-                        if (!drawing && !simRunning) {
+                        if (!drawing && !simRunning)
                             import_game("palya.dat", gameField);
-                            renderNeeded = true;
-                        }
                         break;
                         // todo resize
                 }
                 break;
             case SDL_USEREVENT:
                 // rendering
-                if (renderNeeded) {
-                    fill_rect(renderer, &windowArea, gridParams->bgColor);
-                    draw_cells(renderer, gridParams, gameField);
-                    draw_grid(renderer, gridParams);
-                    draw_menu(renderer, menu);
-
-                    SDL_RenderPresent(renderer);
-                    renderNeeded = false;
-                }
+                fill_rect(renderer, &windowArea, gridParams->bgColor);
+                draw_cells(renderer, gridParams, gameField);
+                draw_grid(renderer, gridParams);
+                draw_menu(renderer, menu);
+                SDL_RenderPresent(renderer);
                 break;
             case SDL_WINDOWEVENT:
                 // window resize
@@ -201,9 +196,14 @@ int main(int argc, char *argv[]) {
                     menu->area.w = windowArea.w - gameArea.w;
                     menu->area.h = windowArea.h;
                     resize_grid_params(gridParams, gameArea, cells);
-                    renderNeeded = true;
                     printf("size changed: %d, %d\n", event.window.data1, event.window.data2);
                 }
+                break;
+            case SDL_TEXTINPUT:
+                printf("textinput: %lu\n", strlen(event.text.text));
+                break;
+            case SDL_TEXTEDITING:
+                printf("textediting\n");
                 break;
         }
     }

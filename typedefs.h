@@ -8,28 +8,28 @@
 #include "debugmalloc.h"
 
 // Enum a cellaállapotokhoz
-typedef enum {
+typedef enum CellState {
     DEAD, LIVE
 } CellState;
 
-typedef enum {
+typedef enum MenuAction {
     CLICKME
 } MenuAction;
 
-typedef enum {
+typedef enum MenuElementType {
     BUTTON, TEXTFIELD
 } MenuElementType;
 
-typedef struct {
+typedef struct Vector2s {
     short x, y;
 } Vector2s;
 
-typedef struct {
+typedef struct Vector2d {
     double x, y;
 } Vector2d;
 
 // Struct a játéktér (cellák) tárolására
-typedef struct {
+typedef struct GameField {
     // Jelenlegi cellák és új cellák
     // (a newCells tömbbe kerülnek a következő iteráció cellaértékei majd a 2 fel lesz cserélve)
     CellState **cells, **newCells;
@@ -38,7 +38,7 @@ typedef struct {
 } GameField;
 
 // Struct a grid paramétereknek
-typedef struct {
+typedef struct GridParams {
     SDL_Rect gameArea, gridArea;
     Vector2s borderWidth, padding, cells;
     Vector2d cellSize;
@@ -46,13 +46,13 @@ typedef struct {
 } GridParams;
 
 // Struct a szimulációhoz szükséges adatok mozgatására
-typedef struct {
-    bool *running, *renderNeeded;
+typedef struct SimData {
+    bool *running;
     int *speedMs;
     GameField *gameField;
 } SimData;
 
-typedef struct {
+typedef struct Text {
     SDL_Rect area;
     char *text;
     TTF_Font *textFont;
@@ -64,20 +64,20 @@ typedef struct {
     /* @param edgeColor A menüelem szélének a színe.
     * @param normalColor A menüelem háttérszíne normál állapotban.
     * @param hoverColor A menüelem háttérszíne amikor a kurzor felette van, vagy meg van nyomva.*/
-    SDL_Color edgeColor, normalColor, interactColor;
+    SDL_Color edgeColor, normalColor, interactColor, selectColor;
 } MenuElementColors;
 
-typedef struct {
+typedef struct MenuElement {
     MenuElementType type;
     MenuAction action;
     MenuElementColors colors;
     SDL_Rect area;
     Text *text;
-    short interactAlpha;
+    Uint8 interactAlpha;
     bool clicked;
 } MenuElement;
 
-typedef struct {
+typedef struct Menu {
     SDL_Rect area;
     SDL_Color bgColor;
 
@@ -90,7 +90,7 @@ typedef struct {
     MenuElement *selTextField;
 } Menu;
 
-typedef struct {
+typedef struct Game {
     SDL_Renderer *renderer;
     SDL_Rect windowArea;
     GameField *gameField;

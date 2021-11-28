@@ -69,23 +69,9 @@ void draw_element(SDL_Renderer *renderer, MenuElement *element, Vector2s offset)
     fill_rect_offset(renderer, &innerArea, element->colors.normalColor, offset);
 
     SDL_Color interactColor = element->colors.interactColor;
-    interactColor.a = element->interactAlpha;
+    interactColor.a = element->clicked ? 200 : element->interactAlpha;
 
     fill_rect_offset(renderer, &innerArea, interactColor, offset);
-}
-
-/**
- * Megkeresi az első menüelemet, ami a megadott képernyőkoordinátákon van.
- * @param menu A menü.
- * @param point A képernyőkoordináták.
- * @return Az első megtalált menüelem, vagy NULL, ha nincs találat.
- */
-MenuElement *find_element(Menu *menu, SDL_Point *point) {
-    for (int i = 0; i < menu->elementCount; ++i) {
-        if (inside_rect(&menu->elements[i]->area, point, &menu->area))
-            return menu->elements[i];
-    }
-    return NULL;
 }
 
 /**
