@@ -27,30 +27,30 @@ Uint32 sim_tick(Uint32 ms, void *param) {
 
 // Létrehozza a program futásához szükséges adatstruktúrákat, és inicializálja az SDL-t.
 Game init() {
-    Vector2s cells = {DEFAULT_CELLS_X, DEFAULT_CELLS_Y};
-    SDL_Rect windowArea = {0, 0, DEFAULT_WINDOW_X, DEFAULT_WINDOW_Y};
+    Vector2s cells = {40, 40};
+    SDL_Rect windowArea = {0, 0, 1050, 800};
     SDL_Rect gameArea = {0, 0, (short) windowArea.w - MENU_WIDTH, windowArea.h};
     SDL_Rect menuArea = {gameArea.w, 0, windowArea.w - gameArea.w, windowArea.h};
 
     SDL_Window *window;
     SDL_Renderer *renderer;
     sdl_init(windowArea.w, windowArea.h, "Game Of Life", &window, &renderer);
-    SDL_SetWindowMinimumSize(window, MIN_WINDOW_X, MIN_WINDOW_Y);
+    SDL_SetWindowMinimumSize(window, 600, 600);
     TTF_Init();
 
     GridParams *gridParams = create_grid_params(gameArea, cells, 0x212121ff, 0xffb300ff, 0x424242ff, 0xfff176ff);
     GameField *gameField = create_field(cells);
     Menu *menu = create_menu(menuArea, 0x7a7a7a77);
 
-    Game game = {renderer, window, windowArea, gameField, gridParams, menu, DEFAULT_SIM_SPEED_MS, false, false, .cursorPos.x = 0, .cursorPos.y = 0};
+    Game game = {renderer, window, windowArea, gameField, gridParams, menu, 101, false, false, .cursorPos.x = 0, .cursorPos.y = 0};
     return game;
 }
 
 // Felépíti a menü elemeit, szövegeket, gombokat, szövegmezőket.
 void build_menu(Game *game) {
     TTF_Font *normalFont = create_font("Chalkboard.ttf", 20);
-    TTF_Font *smallFont = create_font("Chalkboard.ttf", 16);
     TTF_Font *midFont = create_font("Chalkboard.ttf", 18);
+    TTF_Font *smallFont = create_font("Chalkboard.ttf", 16);
 
     MenuElementColors btnColors;
     set_menu_element_colors(0xcccccc7f, 0x505050ff, 0x28282800, 0x00, &btnColors);
@@ -109,7 +109,7 @@ void build_menu(Game *game) {
 // Elindítja az időzítőket.
 void start_timers(Game *game) {
     // Renderelési időzítő létrehozása és elindítása
-    if (SDL_AddTimer(FRAMETIME_MS, render_tick, NULL) == 0) {
+    if (SDL_AddTimer(20, render_tick, NULL) == 0) {
         SDL_Log("FATAL: Couldn't start render timer: %s", SDL_GetError());
         exit(2);
     }
@@ -133,12 +133,12 @@ void forward_event(Game *game, SDL_Event *event) {
         case SDL_MOUSEMOTION:
             mouse_motion(game, event);
             break;
-        case SDL_KEYDOWN:
+        /*case SDL_KEYDOWN:
             key_down(game, event);
             break;
         case SDL_TEXTINPUT:
             text_input(game, event);
-            break;
+            break;*/
         case SDL_USEREVENT:
             user_event(game, event);
             break;

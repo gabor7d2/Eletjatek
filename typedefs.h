@@ -7,17 +7,7 @@
 #include <stdbool.h>
 #include "debugmalloc.h"
 
-#define DEFAULT_WINDOW_X 1050
-#define DEFAULT_WINDOW_Y 800
-#define MIN_WINDOW_X 600
-#define MIN_WINDOW_Y 600
-
 #define MENU_WIDTH 250
-
-#define DEFAULT_CELLS_X 40
-#define DEFAULT_CELLS_Y 40
-#define FRAMETIME_MS 20
-#define DEFAULT_SIM_SPEED_MS 101
 
 // Enum a cellaállapotokhoz
 typedef enum CellState {

@@ -116,14 +116,11 @@ void mouse_motion(Game *game, SDL_Event *event) {
 }
 
 void key_down(Game *game, SDL_Event *event) {
-    printf("keydown\n");
-    switch (event->key.keysym.sym) {
 
-    }
 }
 
 void text_input(Game *game, SDL_Event *event) {
-    printf("textinput: %s (%lu)\n", event->text.text, strlen(event->text.text));
+
 }
 
 void user_event(Game *game, SDL_Event *event) {
