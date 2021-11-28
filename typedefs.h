@@ -25,7 +25,7 @@ typedef enum CellState {
 } CellState;
 
 typedef enum MenuAction {
-    CLICKME
+    AUTO_STEP_TOGGLE, STEP, CLEAR, IMPORT, EXPORT
 } MenuAction;
 
 typedef enum MenuElementType {

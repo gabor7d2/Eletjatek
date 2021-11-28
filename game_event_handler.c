@@ -2,20 +2,45 @@
 #include "menu.h"
 #include "menu_element.h"
 #include "game_logic.h"
+#include "game_display.h"
 #include "file_handling.h"
 #include "sdl_utils.h"
-#include "game_display.h"
+
+void process_element_click(Game *game, SDL_Event *event, MenuElement *element) {
+    switch (element->action) {
+        case AUTO_STEP_TOGGLE:
+            if (!game->drawing) {
+                game->simRunning = !game->simRunning;
+                edit_element_text(game->renderer, element, game->simRunning ? "Auto léptetés KI" : "Auto léptetés BE");
+            }
+            break;
+        case STEP:
+            if (!game->drawing && !game->simRunning)
+                evolve(game->gameField);
+            break;
+        case CLEAR:
+            if (!game->simRunning && !game->drawing)
+                clear_cells(game->gameField);
+            break;
+        case IMPORT:
+            if (!game->drawing && !game->simRunning)
+                import_game("palya.dat", game->gameField);
+            break;
+        case EXPORT:
+            if (!game->drawing && !game->simRunning)
+                export_game("palya.dat", game->gameField);
+            break;
+    }
+}
 
 void mouse_button_down(Game *game, SDL_Event *event) {
     game->cursorPos.x = event->button.x;
     game->cursorPos.y = event->button.y;
 
     MenuElement *element = find_element(game->menu, game->cursorPos);
-    if (element != NULL)
+    if (element != NULL) {
         element->clicked = true;
-    if (element != NULL && element->action == CLICKME) {
-        edit_element_text(game->renderer, element, "Clicked :-)");
-        printf("clicked\n");
+        process_element_click(game, event, element);
     }
 
     if (!game->simRunning && !game->drawing) {
@@ -53,31 +78,13 @@ void mouse_motion(Game *game, SDL_Event *event) {
 void key_down(Game *game, SDL_Event *event) {
     printf("keydown\n");
     switch (event->key.keysym.sym) {
-        case SDLK_c:
-            if (!game->simRunning && !game->drawing)
-                clear_cells(game->gameField);
-            break;
-        case SDLK_SPACE:
-            if (!game->drawing)
-                game->simRunning = !game->simRunning;
-            break;
         case SDLK_UP:
-            if (game->simSpeedMs >= 10) game->simSpeedMs -= 10;
+            if (game->simSpeedMs >= 10)
+                game->simSpeedMs -= 10;
             break;
         case SDLK_DOWN:
-            if (game->simSpeedMs <= 491) game->simSpeedMs += 10;
-            break;
-        case SDLK_RETURN:
-            if (!game->drawing && !game->simRunning)
-                evolve(game->gameField);
-            break;
-        case SDLK_e:
-            if (!game->drawing && !game->simRunning)
-                export_game("palya.dat", game->gameField);
-            break;
-        case SDLK_i:
-            if (!game->drawing && !game->simRunning)
-                import_game("palya.dat", game->gameField);
+            if (game->simSpeedMs <= 491)
+                game->simSpeedMs += 10;
             break;
             // todo resize
     }

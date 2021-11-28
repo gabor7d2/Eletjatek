@@ -48,16 +48,25 @@ Game init() {
 // Felépíti a menü elemeit, szövegeket, gombokat, szövegmezőket.
 void build_menu(Game *game) {
     TTF_Font *font = create_font("Chalkboard.ttf", 20);
-    Uint32 textColor = 0xee70ccff;
+    Uint32 textColor = 0xffffffff;
     MenuElementColors colors;
     set_menu_element_colors(0xcccccc7f, 0x505050ff, 0x28282800, 0xffffffff, &colors);
     SDL_Rect btnArea;
-    set_rect(20, 60, 200, 80, &btnArea);
-    add_element(game->menu, create_button(game->renderer, btnArea, CLICKME, "Click me!", font, textColor, colors));
-    set_rect(20, 160, 200, 80, &btnArea);
-    add_element(game->menu, create_button(game->renderer, btnArea, CLICKME, "Click me!", font, textColor, colors));
-    set_rect(20, 260, 200, 80, &btnArea);
-    add_element(game->menu, create_button(game->renderer, btnArea, CLICKME, "Click me!", font, textColor, colors));
+
+    set_rect(25, 60, 200, 60, &btnArea);
+    add_element(game->menu, create_button(game->renderer, btnArea, AUTO_STEP_TOGGLE, "Auto léptetés BE", font, textColor, colors));
+
+    set_rect(25, 140, 200, 60, &btnArea);
+    add_element(game->menu, create_button(game->renderer, btnArea, STEP, "Léptetés", font, textColor, colors));
+
+    set_rect(25, 220, 200, 60, &btnArea);
+    add_element(game->menu, create_button(game->renderer, btnArea, CLEAR, "Törlés", font, textColor, colors));
+
+    set_rect(25, 300, 200, 60, &btnArea);
+    add_element(game->menu, create_button(game->renderer, btnArea, IMPORT, "Import", font, textColor, colors));
+
+    set_rect(25, 380, 200, 60, &btnArea);
+    add_element(game->menu, create_button(game->renderer, btnArea, EXPORT, "Export", font, textColor, colors));
 }
 
 // Elindítja az időzítőket.
