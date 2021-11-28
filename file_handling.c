@@ -1,12 +1,6 @@
 #include "file_handling.h"
 #include "game_logic.h"
 
-/**
- * Importálja a fájlban levő pályaállapotot a megadott játéktérbe.
- * @param filePath A fájl elérési útja.
- * @param field A játéktér, amibe az importálás történik.
- * @return Igaz, ha sikeres volt a fájl megnyitása, egyébként hamis.
- */
 bool import_game(char *filePath, GameField *field) {
     FILE *fp = fopen(filePath, "r");
     if (fp == NULL) return false;
@@ -25,12 +19,6 @@ bool import_game(char *filePath, GameField *field) {
     return true;
 }
 
-/**
- * Exportálja a játéktér jelenlegi állapotát.
- * @param filePath A fájl elérési útja.
- * @param field A játéktér, amiből az exportálás történik.
- * @return Igaz, ha sikeres volt a fájl megnyitása, egyébként hamis.
- */
 bool export_game(char *filePath, GameField *field) {
     FILE *fp = fopen(filePath, "w");
     if (fp == NULL) return false;

@@ -176,11 +176,13 @@ int main(int argc, char *argv[]) {
                 }
                 break;
             case SDL_USEREVENT:
-                // rendering
+                // clear window
                 fill_rect(renderer, &windowArea, gridParams->bgColor);
-                draw_cells(renderer, gridParams, gameField);
-                draw_grid(renderer, gridParams);
+                // draw game area
+                draw_game(renderer, gridParams, gameField);
+                // draw menu
                 draw_menu(renderer, menu);
+                // render
                 SDL_RenderPresent(renderer);
                 break;
             case SDL_WINDOWEVENT:
@@ -208,13 +210,13 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    SDL_Quit();
+    TTF_CloseFont(font);
+    sdl_exit(&window, &renderer);
 
     // felszabadítás
     free_grid_params(gridParams);
     free_field(gameField);
     free_menu(menu);
-    TTF_CloseFont(font);
 
     return 0;
 }

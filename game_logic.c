@@ -1,9 +1,5 @@
 #include "game_logic.h"
 
-/**
- * A játéktér összes celláját halottra állítja.
- * @param field A játéktér.
- */
 void clear_cells(GameField *field) {
     if (field == NULL) return;
     for (int x = 0; x < field->size.x; ++x) {
@@ -38,11 +34,6 @@ CellState **create_2D_array(short sizeX, short sizeY) {
     return cells;
 }
 
-/**
- * Létrehoz egy megadott méretű játékteret.
- * @param size A játéktér hány cella széles és magas legyen.
- * @return A létrehozott játéktér példány pointere, a hívó kötelessége felszabadítani a free_field() függvény hívásával.
- */
 GameField *create_field(Vector2s size) {
     GameField *field = malloc(sizeof(GameField));
     field->size = size;
@@ -54,10 +45,6 @@ GameField *create_field(Vector2s size) {
     return field;
 }
 
-/**
- * Felszabadítja a memóriából a megadott játékteret.
- * @param field A játéktér.
- */
 void free_field(GameField *field) {
     if (field == NULL || field->cells == NULL || field->cells[0] == NULL ||
         field->newCells == NULL || field->newCells[0] == NULL)
@@ -69,14 +56,6 @@ void free_field(GameField *field) {
     free(field);
 }
 
-/**
- * Kiszámítja, hogy a megadott x és y képernyőkoordinátákon melyik cella van,
- * és megváltoztatja annak állapotát a megadott állapotra.
- * @param field A játéktér.
- * @param params A grid paraméterek.
- * @param pos A változtatni kívánt cella képernyőkoordinátái.
- * @param state A változtatni kívánt cella új állapota.
- */
 void change_cell(GameField *field, GridParams *params, SDL_Point pos, CellState state) {
     if (field == NULL || params == NULL) return;
 
@@ -131,11 +110,6 @@ int get_neighbor_count(GameField *field, int x, int y) {
     return count;
 }
 
-/**
- * A játéktér következő iterációját kiszámolja a newCells tömbben,
- * majd megcseréli a cells és newCells tömböket.
- * @param field A játéktér.
- */
 void evolve(GameField *field) {
     if (field == NULL) return;
 

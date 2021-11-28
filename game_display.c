@@ -19,12 +19,19 @@ int max(int x, int y) {
     else return y;
 }
 
-/**
- * Újraszámolja a grid paraméterek struct értékeit a megadott új értékek használatával.
- * @param params A grid paraméterek példány.
- * @param gameArea A játéktér mérete pixelben (margókkal együtt).
- * @param cells A cellák száma vízszintesen és függőlegesen.
- */
+GridParams *create_grid_params(SDL_Rect gameArea, Vector2s cells, Uint32 deadColor, Uint32 liveColor, Uint32 borderColor, Uint32 bgColor) {
+    // Hely lefoglalása
+    GridParams *params = (GridParams *) malloc(sizeof(GridParams));
+
+    // Értékek előre kiszámítása és beállítása
+    resize_grid_params(params, gameArea, cells);
+    set_color(deadColor, &params->deadColor);
+    set_color(liveColor, &params->liveColor);
+    set_color(borderColor, &params->borderColor);
+    set_color(bgColor, &params->bgColor);
+    return params;
+}
+
 void resize_grid_params(GridParams *params, SDL_Rect gameArea, Vector2s cells) {
     params->gameArea = gameArea;
     params->cells = cells;
@@ -63,34 +70,6 @@ void resize_grid_params(GridParams *params, SDL_Rect gameArea, Vector2s cells) {
     params->cellSize = cellSize;
 }
 
-/**
- * Létrehozza a grid paramétereket tartalmazó structot dinamikus memóriában.
- * @param gameArea A játéktér mérete pixelben (margókkal együtt).
- * @param cells A cellák száma vízszintesen és függőlegesen.
- * @param deadColor A halott cellák színe.
- * @param liveColor Az élő cellák színe.
- * @param borderColor A szegély színe.
- * @param bgColor A háttérszín, a margónak a színe.
- * @return A létrehozott struct példány pointere, a hívó kötelessége felszabadítani a free_grid_params() függvény hívásával.
- */
-GridParams *create_grid_params(SDL_Rect gameArea, Vector2s cells,
-                               Uint32 deadColor, Uint32 liveColor, Uint32 borderColor, Uint32 bgColor) {
-    // Hely lefoglalása
-    GridParams *params = (GridParams *) malloc(sizeof(GridParams));
-
-    // Értékek előre kiszámítása és beállítása
-    resize_grid_params(params, gameArea, cells);
-    set_color(deadColor, &params->deadColor);
-    set_color(liveColor, &params->liveColor);
-    set_color(borderColor, &params->borderColor);
-    set_color(bgColor, &params->bgColor);
-    return params;
-}
-
-/**
- * Felszabadítja a memóriából a megadott grid paraméterek példányt.
- * @param params A grid paraméterek példány.
- */
 void free_grid_params(GridParams *params) {
     free(params);
 }
@@ -139,4 +118,9 @@ void draw_grid(SDL_Renderer *renderer, GridParams *params) {
         short posY = (short) (params->cellSize.y * y + params->padding.y);
         thickLineRGBA(renderer, params->padding.x, posY, (short) (params->gridArea.w + params->padding.x), posY, params->borderWidth.y, bc.r, bc.g, bc.b, bc.a);
     }
+}
+
+void draw_game(SDL_Renderer *renderer, GridParams *params, GameField *field) {
+    draw_cells(renderer, params, field);
+    draw_grid(renderer, params);
 }
