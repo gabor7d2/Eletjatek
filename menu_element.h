@@ -57,7 +57,7 @@ void free_element(MenuElement *element);
  * Beállítja a 'colors' struct értékeit a megadott értékekre.
  * @param edgeColor A menüelem szélének a színe.
  * @param normalColor A menüelem háttérszíne normál állapotban.
- * @param interactColor A menüelem háttérszíne amikor a kurzor felette van, vagy meg van nyomva.
+ * @param interactColor A menüelem háttérszíne amikor a kurzor felette van, vagy le van nyomva.
  * @param selectColor A menüelem háttérszíne, amikor ki van választva (szövegmezőnél használt).
  * @param colors A struct, aminek az értékei változni fognak.
  */

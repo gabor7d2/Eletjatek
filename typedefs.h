@@ -9,11 +9,12 @@
 
 #define MENU_WIDTH 250
 
-// Enum a cellaállapotokhoz
+// Egy cella lehetséges állapotai.
 typedef enum CellState {
     DEAD, LIVE
 } CellState;
 
+// Menüelemek által végezhető tevékenységek.
 typedef enum MenuAction {
     AUTO_STEP_TOGGLE, STEP, CLEAR,
     IMPORT, EXPORT, EDIT_FILE,
@@ -22,6 +23,7 @@ typedef enum MenuAction {
     INC_CELLS_Y, DEC_CELLS_Y, EDIT_CELLS_Y
 } MenuAction;
 
+// A menüelemek lehetséges típusai.
 typedef enum MenuElementType {
     BUTTON, TEXTFIELD
 } MenuElementType;
@@ -34,7 +36,7 @@ typedef struct Vector2d {
     double x, y;
 } Vector2d;
 
-// Struct a játéktér (cellák) tárolására
+// Struct a játéktér (cellák) tárolására.
 typedef struct GameField {
     // Jelenlegi cellák és új cellák
     // (a newCells tömbbe kerülnek a következő iteráció cellaértékei majd a 2 fel lesz cserélve)
@@ -43,13 +45,17 @@ typedef struct GameField {
     Vector2s size;
 } GameField;
 
-// Struct a grid paramétereknek
+// A négyzetháló kirajzolásához szükséges paraméterek.
 typedef struct GridParams {
     SDL_Rect gameArea, gridArea;
     Vector2s borderWidth, padding, cells;
     Vector2d cellSize;
     SDL_Color deadColor, liveColor, borderColor, bgColor;
 } GridParams;
+
+typedef struct MenuElementColors {
+    SDL_Color edgeColor, normalColor, interactColor, selectColor;
+} MenuElementColors;
 
 typedef struct Text {
     SDL_Rect area;
@@ -58,13 +64,6 @@ typedef struct Text {
     SDL_Color textColor;
     SDL_Texture *texture;
 } Text;
-
-typedef struct {
-    /* @param edgeColor
-    * @param normalColor
-    * @param hoverColor A menüelem háttérszíne amikor a kurzor felette van, vagy meg van nyomva.*/
-    SDL_Color edgeColor, normalColor, interactColor, selectColor;
-} MenuElementColors;
 
 typedef struct MenuElement {
     MenuElementType type;
@@ -89,6 +88,7 @@ typedef struct Menu {
     MenuElement *selTextField;
 } Menu;
 
+// A játékhoz használt összes változót egybefogó struct.
 typedef struct Game {
     SDL_Renderer *renderer;
     SDL_Window *window;

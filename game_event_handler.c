@@ -6,6 +6,11 @@
 #include "file_handling.h"
 #include "sdl_utils.h"
 
+/**
+ * Átméretezi a játékteret. (Csökkenti/növeli az oszlopainak vagy sorainak a számát.)
+ * @param game A játék példány.
+ * @param action A menü művelet ami alapján meg lesz állapítva, milyen átméretezésről van szó.
+ */
 void resize_game(Game *game, MenuAction action) {
     Vector2s size = game->gameField->size;
 
@@ -25,6 +30,12 @@ void resize_game(Game *game, MenuAction action) {
     resize_grid_params(game->gridParams, game->gridParams->gameArea, size);
 }
 
+/**
+ * Feldolgoz egy menüelem kattintást.
+ * @param game A játék példány.
+ * @param event Az event, ami előidézte a kattintást.
+ * @param element A kattintott menüelem.
+ */
 void process_element_click(Game *game, SDL_Event *event, MenuElement *element) {
     switch (element->action) {
         case AUTO_STEP_TOGGLE:
