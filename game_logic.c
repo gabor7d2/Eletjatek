@@ -10,7 +10,7 @@ void clear_cells(GameField *field) {
 }
 
 /**
- * Dinamikusan létrehoz egy 2D-s CellState tömböt.
+ * Dinamikusan létrehoz egy 2D-s CellState tömböt és minden celláját alapállapotra (DEAD) állítja.
  * @param sizeX A tömb vízszintes mérete.
  * @param sizeY A tömb függőleges mérete.
  * @return A létrehozott tömb pointere.
@@ -31,6 +31,12 @@ CellState **create_2D_array(short sizeX, short sizeY) {
         cells[i] = cells[0] + i * sizeX;
     }
 
+    for (int x = 0; x < sizeX; ++x) {
+        for (int y = 0; y < sizeY; ++y) {
+            cells[y][x] = DEAD;
+        }
+    }
+
     return cells;
 }
 
@@ -43,8 +49,18 @@ GameField *create_field(Vector2s size) {
 }
 
 void resize_field(GameField *field, Vector2s newSize) {
-    // TODO remember previous cell data
+    CellState **newCells = create_2D_array(newSize.x, newSize.y);
+
     if (field->cells != NULL) {
+        // copy previous cell data
+        short minX = (short) (newSize.x < field->size.x ? newSize.x : field->size.x);
+        short minY = (short) (newSize.y < field->size.y ? newSize.y : field->size.y);
+        for (int x = 0; x < minX; ++x) {
+            for (int y = 0; y < minY; ++y) {
+                newCells[y][x] = field->cells[y][x];
+            }
+        }
+
         free(field->cells[0]);
         free(field->cells);
         free(field->newCells[0]);
@@ -52,11 +68,8 @@ void resize_field(GameField *field, Vector2s newSize) {
     }
 
     field->size = newSize;
-    field->cells = create_2D_array(newSize.x, newSize.y);
+    field->cells = newCells;
     field->newCells = create_2D_array(newSize.x, newSize.y);
-
-    // Feltöltés alapállapottal
-    clear_cells(field);
 }
 
 void free_field(GameField *field) {

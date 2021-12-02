@@ -8,7 +8,7 @@
 
 // SDL kezeléséhez használt dokumentáció: https://infoc.eet.bme.hu/sdl/
 
-// Időzítő, mely FRAMETIME_MS-enként generál egy SDL_USEREVENT-et.
+// Időzítő, mely 20ms-enként generál egy SDL_USEREVENT-et.
 Uint32 render_tick(Uint32 ms, void *param) {
     SDL_Event ev;
     ev.type = SDL_USEREVENT;

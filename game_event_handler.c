@@ -109,7 +109,7 @@ void mouse_button_up(Game *game, SDL_Event *event) {
     }
 
     if (game->drawing) {
-        if (event->button.button == SDL_BUTTON_LEFT || event->button.button == SDL_BUTTON_RIGHT)
+        if (event->button.button == SDL_BUTTON_RIGHT || event->button.button == SDL_BUTTON_LEFT)
             change_cell(game);
         game->drawing = false;
     }
