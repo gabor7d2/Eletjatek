@@ -24,7 +24,7 @@ void calc_interact_alphas(Menu *menu) {
     for (int i = 0; i < menu->elementCount; ++i) {
         MenuElement *element = menu->elements[i];
         if (element == menu->foundElement) {
-            if (element->interactAlpha < 120) element->interactAlpha += 15;
+            if (element->interactAlpha < 120 && !element->selected) element->interactAlpha += 15;
         } else {
             if (element->interactAlpha > 0) element->interactAlpha -= 15;
         }
@@ -47,9 +47,15 @@ void draw_menu(SDL_Renderer *renderer, Menu *menu) {
 }
 
 void free_menu(Menu *menu) {
+    for (int i = 0; i < menu->elementCount; ++i) {
+        if (menu->elements[i]->type == TEXTFIELD)
+            free(menu->elements[i]->text->text);
+    }
+
     for (int i = 0; i < menu->textCount; ++i) {
         free_text(menu->texts[i]);
     }
+
     for (int i = 0; i < menu->elementCount; ++i) {
         free_element(menu->elements[i]);
     }
@@ -78,5 +84,12 @@ MenuElement *find_element(Menu *menu, SDL_Point point) {
         }
     }
     menu->foundElement = NULL;
+    return NULL;
+}
+
+MenuElement *search_element(Menu *menu, MenuAction action) {
+    for (int i = 0; i < menu->elementCount; ++i) {
+        if (menu->elements[i]->action == action) return menu->elements[i];
+    }
     return NULL;
 }

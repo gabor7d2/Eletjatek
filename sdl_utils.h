@@ -67,4 +67,10 @@ void fill_rect_offset(SDL_Renderer *renderer, SDL_Rect *area, SDL_Color color, V
  */
 bool inside_rect(SDL_Rect *rect, SDL_Point *point, SDL_Rect *offset);
 
+// A megadott stringet dinamikus területre másolja és visszaadja a terület pointerét.
+char *create_string(char *str);
+
+// A megadott számot egy dinamikus területen foglalt stringbe másolja és visszaadja a terület pointerét.
+char *parse_int(int num);
+
 #endif //ELETJATEK_SDL_UTILS_H

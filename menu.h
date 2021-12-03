@@ -49,4 +49,6 @@ void add_element(Menu *menu, MenuElement *element);
  */
 MenuElement *find_element(Menu *menu, SDL_Point point);
 
+MenuElement *search_element(Menu *menu, MenuAction action);
+
 #endif //ELETJATEK_MENU_H

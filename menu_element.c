@@ -12,6 +12,7 @@ MenuElement *create_menu_element(SDL_Renderer *renderer, SDL_Rect area, MenuActi
     btn->text = create_text(renderer, area, text, textFont, textColor);
     btn->interactAlpha = 0;
     btn->clicked = false;
+    btn->selected = false;
     return btn;
 }
 
@@ -32,7 +33,12 @@ void edit_element_text(SDL_Renderer *renderer, MenuElement *element, char *newTe
 void draw_element(SDL_Renderer *renderer, MenuElement *element, Vector2s offset) {
     SDL_Rect innerArea = {element->area.x + 4, element->area.y + 4, element->area.w - 8, element->area.h - 8};
     fill_rect_offset(renderer, &element->area, element->colors.edgeColor, offset);
-    fill_rect_offset(renderer, &innerArea, element->colors.normalColor, offset);
+    fill_rect_offset(renderer, &innerArea, element->selected ? element->colors.selectColor : element->colors.normalColor, offset);
+
+    if (element->selected) {
+        SDL_Rect textArea = element->text->area;
+        vlineRGBA(renderer, offset.x + textArea.x + textArea.w + 2, offset.y + textArea.y + 2, offset.y + textArea.y + textArea.h - 2, 0, 0, 0, 255);
+    }
 
     SDL_Color interactColor = element->colors.interactColor;
     interactColor.a = element->clicked ? 200 : element->interactAlpha;

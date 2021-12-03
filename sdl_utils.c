@@ -71,3 +71,17 @@ bool inside_rect(SDL_Rect *rect, SDL_Point *point, SDL_Rect *offset) {
     SDL_Rect offsetedRect = {offset->x + rect->x, offset->y + rect->y, rect->w, rect->h};
     return SDL_PointInRect(point, &offsetedRect);
 }
+
+char *create_string(char *str) {
+    char *dinStr = (char *) malloc(sizeof(char) * (strlen(str) + 1));
+    strcpy(dinStr, str);
+    return dinStr;
+}
+
+char *parse_int(int num) {
+    char str[20];
+    sprintf(str, "%d", num);
+    char *dinStr = (char *) malloc(sizeof(char) * (strlen(str) + 1));
+    strcpy(dinStr, str);
+    return dinStr;
+}

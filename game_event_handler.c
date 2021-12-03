@@ -37,6 +37,7 @@ void resize_game(Game *game, MenuAction action) {
  * @param element A kattintott menüelem.
  */
 void process_element_click(Game *game, SDL_Event *event, MenuElement *element) {
+    MenuElement *elem;
     switch (element->action) {
         case AUTO_STEP_TOGGLE:
             if (!game->drawing) {
@@ -54,33 +55,92 @@ void process_element_click(Game *game, SDL_Event *event, MenuElement *element) {
             break;
         case IMPORT:
             if (!game->drawing && !game->simRunning)
-                import_game("palya.dat", game->gameField);
+                import_game(search_element(game->menu, EDIT_FILE)->text->text, game->gameField);
             break;
         case EXPORT:
             if (!game->drawing && !game->simRunning)
-                export_game("palya.dat", game->gameField);
+                export_game(search_element(game->menu, EDIT_FILE)->text->text, game->gameField);
             break;
         case INC_SPEED:
-            if (game->simSpeedMs >= 10)
+            if (game->simSpeedMs > 10)
                 game->simSpeedMs -= 10;
             else game->simSpeedMs = 1;
+            elem = search_element(game->menu, EDIT_SPEED);
+            free(elem->text->text);
+            edit_element_text(game->renderer, elem, parse_int(game->simSpeedMs));
             break;
         case DEC_SPEED:
-            if (game->simSpeedMs <= 996)
+            if (game->simSpeedMs <= 986)
                 game->simSpeedMs += 10;
             else game->simSpeedMs = 996;
+            elem = search_element(game->menu, EDIT_SPEED);
+            free(elem->text->text);
+            edit_element_text(game->renderer, elem, parse_int(game->simSpeedMs));
             break;
         case INC_CELLS_X:
         case DEC_CELLS_X:
         case INC_CELLS_Y:
         case DEC_CELLS_Y:
             resize_game(game, element->action);
+            elem = search_element(game->menu, EDIT_CELLS_X);
+            free(elem->text->text);
+            edit_element_text(game->renderer, elem, parse_int(game->gameField->size.x));
+            elem = search_element(game->menu, EDIT_CELLS_Y);
+            free(elem->text->text);
+            edit_element_text(game->renderer, elem, parse_int(game->gameField->size.y));
             break;
-        /*case EDIT_FILE:
+        case EDIT_FILE:
         case EDIT_SPEED:
         case EDIT_CELLS_X:
         case EDIT_CELLS_Y:
-            break;*/
+            if (game->menu->selTextField == NULL) {
+                game->menu->selTextField = element;
+                element->selected = true;
+                element->interactAlpha = 0;
+            }
+            break;
+    }
+}
+
+void process_value_edit(Game *game, MenuElement *textField) {
+    switch (textField->action) {
+        case EDIT_SPEED: {
+            int newSpeedMs = (int) strtol(textField->text->text, NULL, 10);
+            game->simSpeedMs = newSpeedMs;
+            break;
+        }
+        case EDIT_CELLS_X:
+        case EDIT_CELLS_Y: {
+            Vector2s newSize = game->gameField->size;
+            short newSizeXY = (short) strtol(textField->text->text, NULL, 10);
+            if (textField->action == EDIT_CELLS_X) newSize.x = newSizeXY;
+            else newSize.y = newSizeXY;
+            resize_field(game->gameField, newSize);
+            resize_grid_params(game->gridParams, game->gridParams->gameArea, newSize);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+bool only_numbers(const char *str) {
+    for (int i = 0; str[i] != '\0'; ++i) {
+        if (str[i] < '0' || str[i] > '9') return false;
+    }
+    return true;
+}
+
+bool validate_input(MenuElement *textField, char *input) {
+    switch (textField->action) {
+        case EDIT_FILE:
+            return true;
+        case EDIT_SPEED:
+        case EDIT_CELLS_X:
+        case EDIT_CELLS_Y:
+            return strlen(textField->text->text) < 3 && only_numbers(input);
+        default:
+            return false;
     }
 }
 
@@ -127,11 +187,65 @@ void mouse_motion(Game *game, SDL_Event *event) {
 }
 
 void key_down(Game *game, SDL_Event *event) {
+    // csak akkor dolgozzuk fel, ha van kiválasztva szövegmező
+    if (game->menu->selTextField == NULL) return;
 
+    switch (event->key.keysym.sym) {
+        case SDLK_BACKSPACE: {
+            // forrás: infoc
+            char *text = game->menu->selTextField->text->text;
+            int textlen = (int) strlen(text);
+            do {
+                if (textlen == 0) {
+                    break;
+                }
+                if ((text[textlen - 1] & 0x80) == 0x00) {
+                    /* Egy bajt */
+                    text[textlen - 1] = 0x00;
+                    break;
+                }
+                if ((text[textlen - 1] & 0xC0) == 0x80) {
+                    /* Bajt, egy tobb-bajtos szekvenciabol */
+                    text[textlen - 1] = 0x00;
+                    textlen--;
+                }
+                if ((text[textlen - 1] & 0xC0) == 0xC0) {
+                    /* Egy tobb-bajtos szekvencia elso bajtja */
+                    text[textlen - 1] = 0x00;
+                    break;
+                }
+            } while (true);
+            // pointer átméretezése
+            text = (char *) realloc(text, sizeof(char) * (strlen(text) + 1));
+            // elem szövegének frissítése
+            edit_element_text(game->renderer, game->menu->selTextField, text);
+            break;
+        }
+        case SDLK_RETURN:
+            process_value_edit(game, game->menu->selTextField);
+            game->menu->selTextField->selected = false;
+            game->menu->selTextField = NULL;
+            break;
+    }
 }
 
 void text_input(Game *game, SDL_Event *event) {
+    // csak akkor dolgozzuk fel, ha van kiválasztva szövegmező
+    if (game->menu->selTextField == NULL) return;
 
+    // bevitt szöveg validálása
+    if (!validate_input(game->menu->selTextField, event->text.text)) return;
+
+    char *text = game->menu->selTextField->text->text;
+
+    // pointer átméretezése
+    text = (char *) realloc(text, sizeof(char) * (strlen(text) + strlen(event->text.text) + 1));
+
+    // új szöveg bemásolása
+    strcat(text, event->text.text);
+
+    // elem szövegének frissítése
+    edit_element_text(game->renderer, game->menu->selTextField, text);
 }
 
 void user_event(Game *game, SDL_Event *event) {

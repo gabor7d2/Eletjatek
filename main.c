@@ -6,6 +6,10 @@
 #include "game_event_handler.h"
 #include "menu_text.h"
 
+#define DEFAULT_SIM_SPEED_MS 101
+#define DEFAULT_CELLS_X 40
+#define DEFAULT_CELLS_Y DEFAULT_CELLS_X
+
 // SDL kezeléséhez használt dokumentáció: https://infoc.eet.bme.hu/sdl/
 
 // Időzítő, mely 20ms-enként generál egy SDL_USEREVENT-et.
@@ -27,7 +31,7 @@ Uint32 sim_tick(Uint32 ms, void *param) {
 
 // Létrehozza a program futásához szükséges adatstruktúrákat, és inicializálja az SDL-t.
 Game init() {
-    Vector2s cells = {40, 40};
+    Vector2s cells = {DEFAULT_CELLS_X, DEFAULT_CELLS_Y};
     SDL_Rect windowArea = {0, 0, 1050, 800};
     SDL_Rect gameArea = {0, 0, (short) windowArea.w - MENU_WIDTH, windowArea.h};
     SDL_Rect menuArea = {gameArea.w, 0, windowArea.w - gameArea.w, windowArea.h};
@@ -42,7 +46,7 @@ Game init() {
     GameField *gameField = create_field(cells);
     Menu *menu = create_menu(menuArea, 0x7a7a7a77);
 
-    Game game = {renderer, window, windowArea, gameField, gridParams, menu, 101, false, false, .cursorPos.x = 0, .cursorPos.y = 0};
+    Game game = {renderer, window, windowArea, gameField, gridParams, menu, DEFAULT_SIM_SPEED_MS, false, false, .cursorPos.x = 0, .cursorPos.y = 0};
     return game;
 }
 
@@ -60,50 +64,58 @@ void build_menu(Game *game) {
     set_rect(25, 30, 200, 60, &area);
     add_element(game->menu, create_button(game->renderer, area, AUTO_STEP_TOGGLE, "Auto léptetés BE", normalFont, textColor, btnColors));
 
-    set_rect(25, 110, 200, 60, &area);
+    set_rect(25, 190, 200, 60, &area);
     add_element(game->menu, create_button(game->renderer, area, STEP, "Léptetés", normalFont, textColor, btnColors));
 
-    set_rect(25, 190, 200, 60, &area);
+    set_rect(25, 270, 200, 60, &area);
     add_element(game->menu, create_button(game->renderer, area, CLEAR, "Törlés", normalFont, textColor, btnColors));
 
-    set_rect(35, 280, 80, 40, &area);
+    set_rect(35, 420, 80, 40, &area);
     add_element(game->menu, create_button(game->renderer, area, IMPORT, "Import", smallFont, textColor, btnColors));
 
-    set_rect(135, 280, 80, 40, &area);
+    set_rect(135, 420, 80, 40, &area);
     add_element(game->menu, create_button(game->renderer, area, EXPORT, "Export", smallFont, textColor, btnColors));
 
-    set_rect(40, 350, 40, 40, &area);
+    set_rect(50, 130, 40, 40, &area);
     add_element(game->menu, create_button(game->renderer, area, DEC_SPEED, "-", smallFont, textColor, btnColors));
 
-    set_rect(170, 350, 40, 40, &area);
+    set_rect(160, 130, 40, 40, &area);
     add_element(game->menu, create_button(game->renderer, area, INC_SPEED, "+", smallFont, textColor, btnColors));
 
-    set_rect(40, 420, 40, 40, &area);
+    set_rect(50, 520, 40, 40, &area);
     add_element(game->menu, create_button(game->renderer, area, DEC_CELLS_X, "-", smallFont, textColor, btnColors));
 
-    set_rect(170, 420, 40, 40, &area);
+    set_rect(160, 520, 40, 40, &area);
     add_element(game->menu, create_button(game->renderer, area, INC_CELLS_X, "+", smallFont, textColor, btnColors));
 
-    set_rect(40, 465, 40, 40, &area);
+    set_rect(50, 605, 40, 40, &area);
     add_element(game->menu, create_button(game->renderer, area, DEC_CELLS_Y, "-", smallFont, textColor, btnColors));
 
-    set_rect(170, 465, 40, 40, &area);
+    set_rect(160, 605, 40, 40, &area);
     add_element(game->menu, create_button(game->renderer, area, INC_CELLS_Y, "+", smallFont, textColor, btnColors));
 
     textColor = 0x1f1f1fff;
-    set_rect(80, 350, 90, 40, &area);
+    set_rect(80, 95, 90, 40, &area);
     add_text(game->menu, create_text(game->renderer, area, "Sebesség", midFont, textColor));
-    set_rect(80, 420, 90, 40, &area);
-    add_text(game->menu, create_text(game->renderer, area, "Oszlopok", midFont, textColor));
-    set_rect(80, 465, 90, 40, &area);
-    add_text(game->menu, create_text(game->renderer, area, "Sorok", midFont, textColor));
+    set_rect(80, 485, 90, 40, &area);
+    add_text(game->menu, create_text(game->renderer, area, "Szélesség", midFont, textColor));
+    set_rect(80, 570, 90, 40, &area);
+    add_text(game->menu, create_text(game->renderer, area, "Magasság", midFont, textColor));
 
-    /*Uint32 tfTextColor = 0x000000ff;
     MenuElementColors tfColors;
-    set_menu_element_colors(0x111111ff, 0xbbbbbbff, 0x77777700, 0xffffffff, &tfColors);
+    set_menu_element_colors(0x111111ff, 0xbbbbbbff, 0xa0a0a000, 0xffffffff, &tfColors);
 
-    set_rect(25, 290, 200, 40, &area);
-    add_element(game->menu, create_button(game->renderer, area, EDIT_FILE, "palya.dat", smallFont, tfTextColor, tfColors));*/
+    set_rect(25, 370, 200, 40, &area);
+    add_element(game->menu, create_text_field(game->renderer, area, EDIT_FILE, create_string("palya.dat"), smallFont, textColor, tfColors));
+
+    set_rect(90, 130, 70, 40, &area);
+    add_element(game->menu, create_text_field(game->renderer, area, EDIT_SPEED, parse_int(DEFAULT_SIM_SPEED_MS), smallFont, textColor, tfColors));
+
+    set_rect(90, 520, 70, 40, &area);
+    add_element(game->menu, create_text_field(game->renderer, area, EDIT_CELLS_X, parse_int(DEFAULT_CELLS_X), smallFont, textColor, tfColors));
+
+    set_rect(90, 605, 70, 40, &area);
+    add_element(game->menu, create_text_field(game->renderer, area, EDIT_CELLS_Y, parse_int(DEFAULT_CELLS_Y), smallFont, textColor, tfColors));
 }
 
 // Elindítja az időzítőket.
@@ -133,12 +145,12 @@ void forward_event(Game *game, SDL_Event *event) {
         case SDL_MOUSEMOTION:
             mouse_motion(game, event);
             break;
-        /*case SDL_KEYDOWN:
+        case SDL_KEYDOWN:
             key_down(game, event);
             break;
         case SDL_TEXTINPUT:
             text_input(game, event);
-            break;*/
+            break;
         case SDL_USEREVENT:
             user_event(game, event);
             break;

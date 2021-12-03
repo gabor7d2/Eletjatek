@@ -7,7 +7,7 @@
  * Létrehoz egy dinamikusan foglalt szövegelemet a megadott paraméterekkel.
  * @param renderer A renderer.
  * @param area A szöveg helye a menühöz relatívan.
- * @param text A megjelenítendő szöveg.
+ * @param text A megjelenítendő szöveg pointere.
  * @param textFont A szöveg betűtípusa.
  * @param textColor A szöveg színe.
  * @return A szövegelemre mutató pointer, a hívó kötelessége felszabadítani a free_text() függvény hívásával.
@@ -16,6 +16,8 @@ Text *create_text(SDL_Renderer *renderer, SDL_Rect area, char *text, TTF_Font *t
 
 /**
  * Szerkeszti egy szövegelem szövegét. A betűtípus, a betűméret és a szöveg színe nem változik.
+ * Amennyiben a megadott newText dinamikus memóriára mutat, a hívó felelőssége az előzőleg
+ * beállított szöveg pointert felszabadítani.
  * @param renderer A renderer.
  * @param text A szerkesztendő szövegelem.
  * @param area A szöveg helye a menühöz relatívan.

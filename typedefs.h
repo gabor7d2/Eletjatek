@@ -72,7 +72,7 @@ typedef struct MenuElement {
     SDL_Rect area;
     Text *text;
     Uint8 interactAlpha;
-    bool clicked;
+    bool clicked, selected;
 } MenuElement;
 
 typedef struct Menu {
