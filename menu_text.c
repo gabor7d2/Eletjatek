@@ -2,7 +2,7 @@
 #include "utils.h"
 
 Text *create_text(SDL_Renderer *renderer, SDL_Rect area, char *text, TTF_Font *textFont, Uint32 textColor) {
-    Text *txt = (Text*) malloc(sizeof(Text));
+    Text *txt = (Text *) malloc(sizeof(Text));
     txt->textFont = textFont;
     txt->texture = NULL;
     set_color(textColor, &txt->textColor);
@@ -20,7 +20,7 @@ void edit_text(SDL_Renderer *renderer, Text *text, SDL_Rect area, char *newText)
         SDL_Rect txtArea = {0, 0, 0, 0};
         text->area = txtArea;
     } else {
-        SDL_Rect txtArea = {.x = area.x + area.w / 2 - surface->w / 2, .y = area.y + area.h / 2 - surface->h / 2, .w = surface->w, .h = surface->h};
+        SDL_Rect txtArea = {area.x + area.w / 2 - surface->w / 2, area.y + area.h / 2 - surface->h / 2, surface->w, surface->h};
         text->area = txtArea;
     }
     text->text = newText;
@@ -30,7 +30,7 @@ void edit_text(SDL_Renderer *renderer, Text *text, SDL_Rect area, char *newText)
 }
 
 void draw_text(SDL_Renderer *renderer, Text *text, Vector2s offset) {
-    SDL_Rect dst = {.x = offset.x + text->area.x, .y = offset.y + text->area.y, .w = text->area.w, .h = text->area.h};
+    SDL_Rect dst = {offset.x + text->area.x, offset.y + text->area.y, text->area.w, text->area.h};
     SDL_RenderCopy(renderer, text->texture, NULL, &dst);
 }
 

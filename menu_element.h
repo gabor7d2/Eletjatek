@@ -8,7 +8,7 @@
  * @param renderer A renderer.
  * @param area A gomb helye a menühöz relatívan.
  * @param action A gomb milyen műveletet végez kattintáskor.
- * @param text A gomb szövege.
+ * @param text A gomb szövege. Kötelezően nem dinamikusan foglaltnak kell lennie (konstansra mutató pointer).
  * @param textFont A gomb szövegének betűtípusa.
  * @param textColor A gomb szövegének színe.
  * @param colors A gomb színei
@@ -22,7 +22,7 @@ MenuElement *create_button(SDL_Renderer *renderer, SDL_Rect area, MenuAction act
  * @param renderer A renderer.
  * @param area A szövegmező helye a menühöz relatívan.
  * @param action A szövegmező milyen műveletet végez kattintáskor.
- * @param text A szövegmező szövege.
+ * @param text A szövegmező szövege. Kötelezően dinamikusan foglaltnak kell lennie.
  * @param textFont A szövegmező szövegének betűtípusa.
  * @param textColor A szövegmező szövegének színe.
  * @param colors A szövegmező színei

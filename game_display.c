@@ -23,7 +23,7 @@ void resize_grid_params(GridParams *params, SDL_Rect gameArea, Vector2s cells) {
 
     // Szegély vastagságának kiszámolása a játéktér mérete és a cellák száma alapján
     short borderWidthValue = (short) ceil((fmin(gameArea.w, gameArea.h) / fmax(cells.x, cells.y)) / 12.0);
-    Vector2s borderWidth = {.x = borderWidthValue, .y = borderWidthValue};
+    Vector2s borderWidth = {borderWidthValue, borderWidthValue};
     params->borderWidth = borderWidth;
 
     // Margó kiszámolása a játéktér mérete és a cellák száma alapján,
@@ -45,13 +45,13 @@ void resize_grid_params(GridParams *params, SDL_Rect gameArea, Vector2s cells) {
     params->padding = padding;
 
     // Négyzetháló területének kiszámolása
-    SDL_Rect gridArea = {.x = padding.x, .y = padding.y};
+    SDL_Rect gridArea = {padding.x, padding.y};
     gridArea.w = (short) (gameArea.w - 2 * padding.x - (borderWidth.x % 2 == 0 ? 0 : 1));
     gridArea.h = (short) (gameArea.h - 2 * padding.y - (borderWidth.y % 2 == 0 ? 0 : 1));
     params->gridArea = gridArea;
 
     // Cellaméret kiszámolása
-    Vector2d cellSize = {.x = gridArea.w / (double) cells.x, .y = gridArea.h / (double) cells.y};
+    Vector2d cellSize = {gridArea.w / (double) cells.x, gridArea.h / (double) cells.y};
     params->cellSize = cellSize;
 }
 
@@ -72,8 +72,6 @@ void draw_cells(SDL_Renderer *renderer, GridParams *params, GameField *field) {
     for (int x = 0; x < field->size.x; ++x) {
         for (int y = 0; y < field->size.y; ++y) {
             SDL_Color color = field->cells[y][x] == LIVE ? params->liveColor : params->deadColor;
-            /*SDL_Rect area = {x * params->cellSize.x, y * params->cellSize.y, params->cellSize.x, params->cellSize.y};
-            fill_rect_offset(renderer, &area, color, params->padding);*/
             boxRGBA(renderer,
                     (short) (x * params->cellSize.x + params->padding.x),
                     (short) (y * params->cellSize.y + params->padding.y),

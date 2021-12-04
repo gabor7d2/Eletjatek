@@ -35,7 +35,7 @@ void draw_menu(SDL_Renderer *renderer, Menu *menu) {
     calc_interact_alphas(menu);
 
     fill_rect(renderer, &menu->area, menu->bgColor);
-    Vector2s offset = {.x = (short) menu->area.x, .y = (short) menu->area.y};
+    Vector2s offset = {(short) menu->area.x, (short) menu->area.y};
 
     for (int i = 0; i < menu->elementCount; ++i) {
         draw_element(renderer, menu->elements[i], offset);

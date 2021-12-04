@@ -3,7 +3,7 @@
 #include "utils.h"
 
 MenuElement *create_menu_element(SDL_Renderer *renderer, SDL_Rect area, MenuAction action, MenuElementType type,
-                           char *text, TTF_Font *textFont, Uint32 textColor, MenuElementColors colors) {
+                                 char *text, TTF_Font *textFont, Uint32 textColor, MenuElementColors colors) {
     MenuElement *btn = (MenuElement *) malloc(sizeof(MenuElement));
     btn->area = area;
     btn->action = action;
@@ -22,7 +22,7 @@ MenuElement *create_button(SDL_Renderer *renderer, SDL_Rect area, MenuAction act
 }
 
 MenuElement *create_text_field(SDL_Renderer *renderer, SDL_Rect area, MenuAction action,
-                           char *text, TTF_Font *textFont, Uint32 textColor, MenuElementColors colors) {
+                               char *text, TTF_Font *textFont, Uint32 textColor, MenuElementColors colors) {
     return create_menu_element(renderer, area, action, TEXTFIELD, text, textFont, textColor, colors);
 }
 

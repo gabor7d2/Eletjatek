@@ -33,11 +33,10 @@ void resize_game(Game *game, MenuAction action) {
 
 /**
  * Kicseréli a művelet alapján megtalált szövegmező szövegét az új szövegre.
- * A csere abból áll, hogy a menüelem jelenlegi char* szövege fel lesz szabadítva,
- * tehát ennek kötelezően dinamikusan foglaltnak kell lennie a függvény helyes
- * működéséhez.
+ * A csere abból áll, hogy a szövegmező jelenlegi char* szövege fel lesz szabadítva,
+ * mivel a szövegmezők kötelezően dinamikusan foglalt szöveget tartalmaznak.
  * @param game A játék példány.
- * @param action A keresett szövegmező művelete.
+ * @param action A keresett szövegmező művelete. Kötelezően dinamikusan foglaltnak kell lennie.
  * @param newText Az új beállítandó szöveg.
  */
 void replace_text_field_text(Game *game, MenuAction action, char *newText) {
@@ -55,25 +54,23 @@ void replace_text_field_text(Game *game, MenuAction action, char *newText) {
 void process_element_click(Game *game, SDL_Event *event, MenuElement *element) {
     switch (element->action) {
         case AUTO_STEP_TOGGLE:
-            if (!game->drawing) {
-                game->simRunning = !game->simRunning;
-                edit_element_text(game->renderer, element, game->simRunning ? "Auto léptetés KI" : "Auto léptetés BE");
-            }
+            game->simRunning = !game->simRunning;
+            edit_element_text(game->renderer, element, game->simRunning ? "Auto léptetés KI" : "Auto léptetés BE");
             break;
         case STEP:
-            if (!game->drawing && !game->simRunning)
+            if (!game->simRunning)
                 evolve(game->gameField);
             break;
         case CLEAR:
-            if (!game->drawing && !game->simRunning)
+            if (!game->simRunning)
                 clear_cells(game->gameField);
             break;
         case IMPORT:
-            if (!game->drawing && !game->simRunning)
+            if (!game->simRunning)
                 import_game(search_element(game->menu, EDIT_FILE)->text->text, game->gameField);
             break;
         case EXPORT:
-            if (!game->drawing && !game->simRunning)
+            if (!game->simRunning)
                 export_game(search_element(game->menu, EDIT_FILE)->text->text, game->gameField);
             break;
         case INC_SPEED:
@@ -86,25 +83,71 @@ void process_element_click(Game *game, SDL_Event *event, MenuElement *element) {
             break;
         case INC_CELLS_X:
         case DEC_CELLS_X:
-            resize_game(game, element->action);
-            replace_text_field_text(game, EDIT_CELLS_X, parse_int(game->gameField->size.x));
+            if (!game->simRunning) {
+                resize_game(game, element->action);
+                replace_text_field_text(game, EDIT_CELLS_X, parse_int(game->gameField->size.x));
+            }
             break;
         case INC_CELLS_Y:
         case DEC_CELLS_Y:
-            resize_game(game, element->action);
-            replace_text_field_text(game, EDIT_CELLS_Y, parse_int(game->gameField->size.y));
+            if (!game->simRunning) {
+                resize_game(game, element->action);
+                replace_text_field_text(game, EDIT_CELLS_Y, parse_int(game->gameField->size.y));
+            }
             break;
         case EDIT_FILE:
         case EDIT_SPEED:
         case EDIT_CELLS_X:
         case EDIT_CELLS_Y:
-            if (game->menu->selTextField == NULL) {
-                game->menu->selTextField = element;
-                element->selected = true;
-                element->interactAlpha = 0;
+            // a játéktér mérete csak akkor szerkeszthető, ha a szimuláció épp nem fut
+            if (!game->simRunning || element->action == EDIT_FILE || element->action == EDIT_SPEED) {
+                if (game->menu->selTextField == NULL) {
+                    game->menu->selTextField = element;
+                    element->selected = true;
+                    element->interactAlpha = 0;
+                }
             }
             break;
     }
+}
+
+void mouse_button_down(Game *game, SDL_Event *event) {
+    game->cursorPos.x = event->button.x;
+    game->cursorPos.y = event->button.y;
+
+    MenuElement *element = find_element(game->menu, game->cursorPos);
+    if (element != NULL) {
+        element->clicked = true;
+        process_element_click(game, event, element);
+    } else if (!game->simRunning && !game->drawing) {
+        if (event->button.button == SDL_BUTTON_RIGHT || event->button.button == SDL_BUTTON_LEFT) {
+            game->drawing = true;
+            game->drawMode = event->button.button == SDL_BUTTON_LEFT ? LIVE : DEAD;
+        }
+    }
+}
+
+void mouse_button_up(Game *game, SDL_Event *event) {
+    if (game->menu->foundElement != NULL) {
+        game->menu->foundElement->clicked = false;
+    }
+    find_element(game->menu, game->cursorPos);
+
+    if (game->drawing) {
+        if (event->button.button == SDL_BUTTON_RIGHT || event->button.button == SDL_BUTTON_LEFT)
+            change_cell(game);
+        game->drawing = false;
+    }
+}
+
+void mouse_motion(Game *game, SDL_Event *event) {
+    if (game->drawing)
+        change_cell(game);
+    else if (game->menu->foundElement == NULL || !game->menu->foundElement->clicked)
+        find_element(game->menu, game->cursorPos);
+
+    game->cursorPos.x = event->button.x;
+    game->cursorPos.y = event->button.y;
 }
 
 /**
@@ -133,68 +176,6 @@ void process_value_edit(Game *game, MenuElement *textField) {
         default:
             break;
     }
-}
-
-/**
- * Ellenőrzi, hogy a megadott szöveg megfelel-e az adott műveletű
- * szövegmezőnek.
- * @param textField A szövegmező.
- * @param input A szövegmező tervezett új tartalma.
- * @return Ha megfelel, igaz, ha nem, hamis.
- */
-bool validate_input(MenuElement *textField, char *input) {
-    switch (textField->action) {
-        case EDIT_FILE:
-            return true;
-        case EDIT_SPEED:
-        case EDIT_CELLS_X:
-        case EDIT_CELLS_Y:
-            return strlen(textField->text->text) < 3 && only_numbers(input);
-        default:
-            return false;
-    }
-}
-
-void mouse_button_down(Game *game, SDL_Event *event) {
-    game->cursorPos.x = event->button.x;
-    game->cursorPos.y = event->button.y;
-
-    MenuElement *element = find_element(game->menu, game->cursorPos);
-    if (element != NULL) {
-        element->clicked = true;
-        process_element_click(game, event, element);
-    }
-
-    if (!game->simRunning && !game->drawing) {
-        if (event->button.button == SDL_BUTTON_RIGHT || event->button.button == SDL_BUTTON_LEFT) {
-            game->drawing = true;
-            game->drawMode = event->button.button == SDL_BUTTON_LEFT ? LIVE : DEAD;
-        }
-    }
-}
-
-void mouse_button_up(Game *game, SDL_Event *event) {
-    if (game->menu->foundElement != NULL) {
-        game->menu->foundElement->clicked = false;
-        find_element(game->menu, game->cursorPos);
-    }
-
-    if (game->drawing) {
-        if (event->button.button == SDL_BUTTON_RIGHT || event->button.button == SDL_BUTTON_LEFT)
-            change_cell(game);
-        game->drawing = false;
-    }
-}
-
-void mouse_motion(Game *game, SDL_Event *event) {
-    if (game->menu->foundElement == NULL || !game->menu->foundElement->clicked)
-        find_element(game->menu, game->cursorPos);
-
-    if (game->drawing)
-        change_cell(game);
-
-    game->cursorPos.x = event->button.x;
-    game->cursorPos.y = event->button.y;
 }
 
 void key_down(Game *game, SDL_Event *event) {
@@ -226,8 +207,10 @@ void key_down(Game *game, SDL_Event *event) {
                     break;
                 }
             } while (true);
+
             // pointer átméretezése
             text = (char *) realloc(text, sizeof(char) * (strlen(text) + 1));
+
             // elem szövegének frissítése
             edit_element_text(game->renderer, game->menu->selTextField, text);
             break;
@@ -237,6 +220,26 @@ void key_down(Game *game, SDL_Event *event) {
             game->menu->selTextField->selected = false;
             game->menu->selTextField = NULL;
             break;
+    }
+}
+
+/**
+ * Ellenőrzi, hogy a megadott szöveg megfelel-e az adott műveletű
+ * szövegmezőnek.
+ * @param textField A szövegmező.
+ * @param input A szövegmező tervezett új tartalma.
+ * @return Ha megfelel, igaz, ha nem, hamis.
+ */
+bool validate_input(MenuElement *textField, char *input) {
+    switch (textField->action) {
+        case EDIT_FILE:
+            return true;
+        case EDIT_SPEED:
+        case EDIT_CELLS_X:
+        case EDIT_CELLS_Y:
+            return strlen(textField->text->text) < 3 && only_numbers(input);
+        default:
+            return false;
     }
 }
 
