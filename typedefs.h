@@ -8,8 +8,6 @@
 #include <math.h>
 #include "debugmalloc.h"
 
-#define SIM_SPEED_MS 1000
-#define SIM_SPEED_BASE 2
 #define DEFAULT_CELLS_X 40
 #define DEFAULT_CELLS_Y DEFAULT_CELLS_X
 #define MENU_WIDTH 250
@@ -102,7 +100,6 @@ typedef struct Game {
     GridParams *gridParams;
     Menu *menu;
 
-    double simSpeedExp;
     int simSpeedMs;
     bool simRunning, drawing;
     CellState drawMode;

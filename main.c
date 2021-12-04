@@ -42,7 +42,7 @@ Game init() {
     GameField *gameField = create_field(cells);
     Menu *menu = create_menu(menuArea, 0x7a7a7a77);
 
-    Game game = {renderer, window, windowArea, gameField, gridParams, menu, log(10) / log(SIM_SPEED_BASE), SIM_SPEED_MS, false, false, .cursorPos.x = 0, .cursorPos.y = 0};
+    Game game = {renderer, window, windowArea, gameField, gridParams, menu, 100, false, false, .cursorPos.x = 0, .cursorPos.y = 0};
     return game;
 }
 

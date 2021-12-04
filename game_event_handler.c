@@ -79,18 +79,20 @@ void process_element_click(Game *game, SDL_Event *event, MenuElement *element) {
             if (!game->simRunning)
                 export_game(search_element(game->menu, EDIT_FILE)->text->text, game->gameField);
             break;
-        case INC_SPEED:
-            game->simSpeedExp = fmin(game->simSpeedExp + 1, ceil(log2(SIM_SPEED_MS / 2.0) / log2(SIM_SPEED_BASE)));
-            game->simSpeedMs = (int) fmax(SIM_SPEED_MS / pow(SIM_SPEED_BASE, game->simSpeedExp), 1);
-            printf("new speed: %d\n", game->simSpeedMs);
-            replace_text_field_text(game, EDIT_SPEED, double_to_string(pow(SIM_SPEED_BASE, game->simSpeedExp)));
+        case INC_SPEED: {
+            double newSpeed = fmin(parse_double(search_element(game->menu, EDIT_SPEED)->text->text) + 10, 1000);
+            game->simSpeedMs = (int) (1000 / newSpeed);
+            printf("%d\n", game->simSpeedMs);
+            replace_text_field_text(game, EDIT_SPEED, double_to_string(newSpeed));
             break;
-        case DEC_SPEED:
-            game->simSpeedExp = fmax(game->simSpeedExp - 1, floor(log2(SIM_SPEED_MS / 1000.0) / log2(SIM_SPEED_BASE)));
-            game->simSpeedMs = (int) fmax(SIM_SPEED_MS / pow(SIM_SPEED_BASE, game->simSpeedExp), 1);
-            printf("new speed: %d\n", game->simSpeedMs);
-            replace_text_field_text(game, EDIT_SPEED, double_to_string(pow(SIM_SPEED_BASE, game->simSpeedExp)));
+        }
+        case DEC_SPEED: {
+            double newSpeed = fmax(parse_double(search_element(game->menu, EDIT_SPEED)->text->text) - 10, 1);
+            game->simSpeedMs = (int) (1000 / newSpeed);
+            printf("%d\n", game->simSpeedMs);
+            replace_text_field_text(game, EDIT_SPEED, double_to_string(newSpeed));
             break;
+        }
         case INC_CELLS_X:
         case DEC_CELLS_X:
             if (!game->simRunning) {
@@ -170,9 +172,15 @@ void process_value_edit(Game *game, MenuElement *textField) {
     switch (textField->action) {
         case EDIT_SPEED: {
             double newSpeed = parse_double(textField->text->text);
-            game->simSpeedExp = fmin(log2(newSpeed) / log2(SIM_SPEED_BASE), ceil(log2(SIM_SPEED_MS / 2.0) / log2(SIM_SPEED_BASE)));
-            game->simSpeedMs = (int) fmax(SIM_SPEED_MS / pow(SIM_SPEED_BASE, game->simSpeedExp), 1);
-            replace_text_field_text(game, EDIT_SPEED, double_to_string(pow(SIM_SPEED_BASE, game->simSpeedExp)));
+            if (newSpeed == 0) {
+                newSpeed = 1;
+                replace_text_field_text(game, EDIT_SPEED, int_to_string(1));
+            }
+            if (newSpeed > 1000) {
+                newSpeed = 1000;
+                replace_text_field_text(game, EDIT_SPEED, int_to_string(1000));
+            }
+            game->simSpeedMs = (int) (1000.0 / newSpeed);
             printf("new speed: %d\n", game->simSpeedMs);
             break;
         }
@@ -248,7 +256,7 @@ bool validate_input(MenuElement *textField, char *input) {
         case EDIT_FILE:
             return true;
         case EDIT_SPEED:
-            return (strcmp(input, "0") != 0 || strlen(textField->text->text) > 0) && strlen(textField->text->text) < 6 && only_numbers(input);
+            return strlen(textField->text->text) < 5 && only_numbers(input);
         case EDIT_CELLS_X:
         case EDIT_CELLS_Y:
             return strlen(textField->text->text) < 3 && only_numbers(input);
