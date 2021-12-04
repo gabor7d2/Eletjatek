@@ -1,5 +1,5 @@
-#ifndef ELETJATEK_SDL_UTILS_H
-#define ELETJATEK_SDL_UTILS_H
+#ifndef ELETJATEK_UTILS_H
+#define ELETJATEK_UTILS_H
 
 #include "typedefs.h"
 
@@ -73,4 +73,11 @@ char *create_string(char *str);
 // A megadott számot egy dinamikus területen foglalt stringbe másolja és visszaadja a terület pointerét.
 char *parse_int(int num);
 
-#endif //ELETJATEK_SDL_UTILS_H
+/**
+ * Megmondja, hogy az adott string csak számokat (0-9 karakterek) tartalmaz-e.
+ * @param str A vizsgálandó szöveg.
+ * @return Igaz, ha csak számokat tartalmaz, egyébként hamis.
+ */
+bool only_numbers(const char *str);
+
+#endif //ELETJATEK_UTILS_H

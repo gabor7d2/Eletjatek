@@ -1,6 +1,6 @@
 #include "menu_element.h"
 #include "menu_text.h"
-#include "sdl_utils.h"
+#include "utils.h"
 
 MenuElement *create_menu_element(SDL_Renderer *renderer, SDL_Rect area, MenuAction action, MenuElementType type,
                            char *text, TTF_Font *textFont, Uint32 textColor, MenuElementColors colors) {
@@ -36,6 +36,7 @@ void draw_element(SDL_Renderer *renderer, MenuElement *element, Vector2s offset)
     fill_rect_offset(renderer, &innerArea, element->selected ? element->colors.selectColor : element->colors.normalColor, offset);
 
     if (element->selected) {
+        // szövegmező végére kurzort rajzolni ha épp szerkesztés alatt van
         SDL_Rect textArea = element->text->area;
         vlineRGBA(renderer, offset.x + textArea.x + textArea.w + 2, offset.y + textArea.y + 2, offset.y + textArea.y + textArea.h - 2, 0, 0, 0, 255);
     }

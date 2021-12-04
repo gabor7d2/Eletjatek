@@ -1,4 +1,4 @@
-#include "sdl_utils.h"
+#include "utils.h"
 
 void sdl_init(int width, int height, char *title, SDL_Window **pwindow, SDL_Renderer **prenderer) {
     // SDL inicializálása és ablak megnyitása
@@ -84,4 +84,11 @@ char *parse_int(int num) {
     char *dinStr = (char *) malloc(sizeof(char) * (strlen(str) + 1));
     strcpy(dinStr, str);
     return dinStr;
+}
+
+bool only_numbers(const char *str) {
+    for (int i = 0; str[i] != '\0'; ++i) {
+        if (!isdigit(str[i])) return false;
+    }
+    return true;
 }

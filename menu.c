@@ -1,7 +1,7 @@
 #include "menu.h"
 #include "menu_element.h"
 #include "menu_text.h"
-#include "sdl_utils.h"
+#include "utils.h"
 
 Menu *create_menu(SDL_Rect menuArea, Uint32 bgColor) {
     Menu *menu = (Menu *) malloc(sizeof(Menu));

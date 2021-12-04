@@ -1,10 +1,11 @@
 #include "game_event_handler.h"
 #include "menu.h"
 #include "menu_element.h"
-#include "game_logic.h"
 #include "game_display.h"
+#include "game_logic.h"
 #include "file_handling.h"
-#include "sdl_utils.h"
+#include "math.h"
+#include "utils.h"
 
 /**
  * Átméretezi a játékteret. (Csökkenti/növeli az oszlopainak vagy sorainak a számát.)
@@ -31,13 +32,27 @@ void resize_game(Game *game, MenuAction action) {
 }
 
 /**
- * Feldolgoz egy menüelem kattintást.
+ * Kicseréli a művelet alapján megtalált szövegmező szövegét az új szövegre.
+ * A csere abból áll, hogy a menüelem jelenlegi char* szövege fel lesz szabadítva,
+ * tehát ennek kötelezően dinamikusan foglaltnak kell lennie a függvény helyes
+ * működéséhez.
+ * @param game A játék példány.
+ * @param action A keresett szövegmező művelete.
+ * @param newText Az új beállítandó szöveg.
+ */
+void replace_text_field_text(Game *game, MenuAction action, char *newText) {
+    MenuElement *element = search_element(game->menu, action);
+    free(element->text->text);
+    edit_element_text(game->renderer, element, newText);
+}
+
+/**
+ * Feldolgoz egy menüelem kattintást a menüelem művelete alapján.
  * @param game A játék példány.
  * @param event Az event, ami előidézte a kattintást.
  * @param element A kattintott menüelem.
  */
 void process_element_click(Game *game, SDL_Event *event, MenuElement *element) {
-    MenuElement *elem;
     switch (element->action) {
         case AUTO_STEP_TOGGLE:
             if (!game->drawing) {
@@ -62,32 +77,22 @@ void process_element_click(Game *game, SDL_Event *event, MenuElement *element) {
                 export_game(search_element(game->menu, EDIT_FILE)->text->text, game->gameField);
             break;
         case INC_SPEED:
-            if (game->simSpeedMs > 10)
-                game->simSpeedMs -= 10;
-            else game->simSpeedMs = 1;
-            elem = search_element(game->menu, EDIT_SPEED);
-            free(elem->text->text);
-            edit_element_text(game->renderer, elem, parse_int(game->simSpeedMs));
+            game->simSpeedMs = (int) fmax(game->simSpeedMs - 10, 1);
+            replace_text_field_text(game, EDIT_SPEED, parse_int(game->simSpeedMs));
             break;
         case DEC_SPEED:
-            if (game->simSpeedMs <= 986)
-                game->simSpeedMs += 10;
-            else game->simSpeedMs = 996;
-            elem = search_element(game->menu, EDIT_SPEED);
-            free(elem->text->text);
-            edit_element_text(game->renderer, elem, parse_int(game->simSpeedMs));
+            game->simSpeedMs = (int) fmin(game->simSpeedMs + 10, 996);
+            replace_text_field_text(game, EDIT_SPEED, parse_int(game->simSpeedMs));
             break;
         case INC_CELLS_X:
         case DEC_CELLS_X:
+            resize_game(game, element->action);
+            replace_text_field_text(game, EDIT_CELLS_X, parse_int(game->gameField->size.x));
+            break;
         case INC_CELLS_Y:
         case DEC_CELLS_Y:
             resize_game(game, element->action);
-            elem = search_element(game->menu, EDIT_CELLS_X);
-            free(elem->text->text);
-            edit_element_text(game->renderer, elem, parse_int(game->gameField->size.x));
-            elem = search_element(game->menu, EDIT_CELLS_Y);
-            free(elem->text->text);
-            edit_element_text(game->renderer, elem, parse_int(game->gameField->size.y));
+            replace_text_field_text(game, EDIT_CELLS_Y, parse_int(game->gameField->size.y));
             break;
         case EDIT_FILE:
         case EDIT_SPEED:
@@ -102,6 +107,12 @@ void process_element_click(Game *game, SDL_Event *event, MenuElement *element) {
     }
 }
 
+/**
+ * Feldolgozza egy szövegmező szerkesztésének befejezését.
+ * A szövegmező művelete alapján a megfelelő játékváltozót beállítja a szövegmező értékére.
+ * @param game A játék példány.
+ * @param textField A szerkesztett szövegmező.
+ */
 void process_value_edit(Game *game, MenuElement *textField) {
     switch (textField->action) {
         case EDIT_SPEED: {
@@ -124,13 +135,13 @@ void process_value_edit(Game *game, MenuElement *textField) {
     }
 }
 
-bool only_numbers(const char *str) {
-    for (int i = 0; str[i] != '\0'; ++i) {
-        if (str[i] < '0' || str[i] > '9') return false;
-    }
-    return true;
-}
-
+/**
+ * Ellenőrzi, hogy a megadott szöveg megfelel-e az adott műveletű
+ * szövegmezőnek.
+ * @param textField A szövegmező.
+ * @param input A szövegmező tervezett új tartalma.
+ * @return Ha megfelel, igaz, ha nem, hamis.
+ */
 bool validate_input(MenuElement *textField, char *input) {
     switch (textField->action) {
         case EDIT_FILE:

@@ -1,23 +1,8 @@
 #include "game_display.h"
-#include "sdl_utils.h"
+#include "utils.h"
+#include "math.h"
 
 #define MIN_PADDING 10
-
-/*
- * Összehasonlít két számot, majd visszatéríti a kisebbet.
- */
-int min(int x, int y) {
-    if (x > y) return y;
-    else return x;
-}
-
-/*
- * Összehasonlít két számot, majd visszatéríti a nagyobbat.
- */
-int max(int x, int y) {
-    if (x > y) return x;
-    else return y;
-}
 
 GridParams *create_grid_params(SDL_Rect gameArea, Vector2s cells, Uint32 deadColor, Uint32 liveColor, Uint32 borderColor, Uint32 bgColor) {
     // Hely lefoglalása
@@ -37,7 +22,7 @@ void resize_grid_params(GridParams *params, SDL_Rect gameArea, Vector2s cells) {
     params->cells = cells;
 
     // Szegély vastagságának kiszámolása a játéktér mérete és a cellák száma alapján
-    short borderWidthValue = (short) ceil((min(gameArea.w, gameArea.h) / (double) max(cells.x, cells.y)) / 12.0);
+    short borderWidthValue = (short) ceil((fmin(gameArea.w, gameArea.h) / fmax(cells.x, cells.y)) / 12.0);
     Vector2s borderWidth = {.x = borderWidthValue, .y = borderWidthValue};
     params->borderWidth = borderWidth;
 
@@ -47,11 +32,11 @@ void resize_grid_params(GridParams *params, SDL_Rect gameArea, Vector2s cells) {
     if ((gameArea.w / (double) cells.x) > (gameArea.h / (double) cells.y)) {
         padding.y = MIN_PADDING;
         padding.x = (short) ((gameArea.w - ((gameArea.h - 2 * padding.y) / (double) cells.y) * cells.x) / 2);
-        padding.x = (short) max(MIN_PADDING, padding.x);
+        padding.x = (short) fmax(MIN_PADDING, padding.x);
     } else {
         padding.x = MIN_PADDING;
         padding.y = (short) ((gameArea.h - ((gameArea.w - 2 * padding.x) / (double) cells.x) * cells.y) / 2);
-        padding.y = (short) max(MIN_PADDING, padding.y);
+        padding.y = (short) fmax(MIN_PADDING, padding.y);
     }
 
     // Szegély vastagság beleszámolása a margóba

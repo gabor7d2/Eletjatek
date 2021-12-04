@@ -1,5 +1,5 @@
 #include "menu_text.h"
-#include "sdl_utils.h"
+#include "utils.h"
 
 Text *create_text(SDL_Renderer *renderer, SDL_Rect area, char *text, TTF_Font *textFont, Uint32 textColor) {
     Text *txt = (Text*) malloc(sizeof(Text));

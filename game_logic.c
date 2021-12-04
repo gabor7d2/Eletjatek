@@ -1,4 +1,5 @@
 #include "game_logic.h"
+#include "math.h"
 
 void clear_cells(GameField *field) {
     if (field == NULL) return;
@@ -53,8 +54,8 @@ void resize_field(GameField *field, Vector2s newSize) {
 
     if (field->cells != NULL) {
         // copy previous cell data
-        short minX = (short) (newSize.x < field->size.x ? newSize.x : field->size.x);
-        short minY = (short) (newSize.y < field->size.y ? newSize.y : field->size.y);
+        short minX = (short) fmin(field->size.x, newSize.x);
+        short minY = (short) fmin(field->size.y, newSize.y);
         for (int x = 0; x < minX; ++x) {
             for (int y = 0; y < minY; ++y) {
                 newCells[y][x] = field->cells[y][x];

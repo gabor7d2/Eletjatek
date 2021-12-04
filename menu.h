@@ -49,6 +49,11 @@ void add_element(Menu *menu, MenuElement *element);
  */
 MenuElement *find_element(Menu *menu, SDL_Point point);
 
+/**
+ * Müvelet alapján keres menüelemet, ha nincs találat, NULL-t térit vissza.
+ * @param menu A menü.
+ * @param action A keresett gomb művelete.
+ */
 MenuElement *search_element(Menu *menu, MenuAction action);
 
 #endif //ELETJATEK_MENU_H

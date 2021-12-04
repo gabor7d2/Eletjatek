@@ -1,10 +1,10 @@
 #include "menu.h"
 #include "menu_element.h"
+#include "menu_text.h"
 #include "game_display.h"
 #include "game_logic.h"
-#include "sdl_utils.h"
 #include "game_event_handler.h"
-#include "menu_text.h"
+#include "utils.h"
 
 #define DEFAULT_SIM_SPEED_MS 101
 #define DEFAULT_CELLS_X 40
@@ -56,6 +56,7 @@ void build_menu(Game *game) {
     TTF_Font *midFont = create_font("Chalkboard.ttf", 18);
     TTF_Font *smallFont = create_font("Chalkboard.ttf", 16);
 
+    // gombok
     MenuElementColors btnColors;
     set_menu_element_colors(0xcccccc7f, 0x505050ff, 0x28282800, 0x00, &btnColors);
     Uint32 textColor = 0xffffffff;
@@ -94,6 +95,7 @@ void build_menu(Game *game) {
     set_rect(160, 605, 40, 40, &area);
     add_element(game->menu, create_button(game->renderer, area, INC_CELLS_Y, "+", smallFont, textColor, btnColors));
 
+    // szövegek
     textColor = 0x1f1f1fff;
     set_rect(80, 95, 90, 40, &area);
     add_text(game->menu, create_text(game->renderer, area, "Sebesség", midFont, textColor));
@@ -102,8 +104,9 @@ void build_menu(Game *game) {
     set_rect(80, 570, 90, 40, &area);
     add_text(game->menu, create_text(game->renderer, area, "Magasság", midFont, textColor));
 
+    // szövegmezők
     MenuElementColors tfColors;
-    set_menu_element_colors(0x111111ff, 0xbbbbbbff, 0xa0a0a000, 0xffffffff, &tfColors);
+    set_menu_element_colors(0x111111ff, 0xbbbbbbff, 0xffffff00, 0xffffffff, &tfColors);
 
     set_rect(25, 370, 200, 40, &area);
     add_element(game->menu, create_text_field(game->renderer, area, EDIT_FILE, create_string("palya.dat"), smallFont, textColor, tfColors));
