@@ -78,7 +78,7 @@ char *create_string(char *str) {
     return dinStr;
 }
 
-char *parse_int(int num) {
+char *int_to_string(int num) {
     char str[20];
     sprintf(str, "%d", num);
     char *dinStr = (char *) malloc(sizeof(char) * (strlen(str) + 1));
@@ -86,9 +86,38 @@ char *parse_int(int num) {
     return dinStr;
 }
 
+char *double_to_string(double num) {
+    char str[20];
+    sprintf(str, "%.3g", num);
+    char *dinStr = (char *) malloc(sizeof(char) * (strlen(str) + 1));
+    strcpy(dinStr, str);
+    return dinStr;
+}
+
+int parse_int(char *str) {
+    return strtol(str, NULL, 10);
+}
+
+double parse_double(char *str) {
+    char *whole = strtok(str, ".");
+    char *fraction = strtok(NULL, ".");
+
+    double number = parse_int(whole);
+
+    // forrás: https://stackoverflow.com/questions/40337939/floating-point-equivalent-to-strtol-in-c
+
+    if (fraction != NULL) {
+        int sign = number < 0 ? -1 : 1;
+        for (int i = 0; fraction[i] != '\0'; i++) // iterating the fraction string
+            number += (fraction[i] - '0') * pow(10, -(i + 1)) * sign;
+    }
+
+    return number;
+}
+
 bool only_numbers(const char *str) {
     for (int i = 0; str[i] != '\0'; ++i) {
-        if (!isdigit(str[i])) return false;
+        if (!isdigit(str[i]) && str[i] != '.') return false;
     }
     return true;
 }

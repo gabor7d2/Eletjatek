@@ -71,7 +71,16 @@ bool inside_rect(SDL_Rect *rect, SDL_Point *point, SDL_Rect *offset);
 char *create_string(char *str);
 
 // A megadott számot egy dinamikus területen foglalt stringbe másolja és visszaadja a terület pointerét.
-char *parse_int(int num);
+char *int_to_string(int num);
+
+// A megadott számot egy dinamikus területen foglalt stringbe másolja és visszaadja a terület pointerét.
+char *double_to_string(double num);
+
+// A megadott stringet egész számmá konvertálja
+int parse_int(char *str);
+
+// A megadott stringet valós számmá konvertálja
+double parse_double(char *str);
 
 /**
  * Megmondja, hogy az adott string csak számokat (0-9 karakterek) tartalmaz-e.

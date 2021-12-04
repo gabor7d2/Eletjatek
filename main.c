@@ -6,10 +6,6 @@
 #include "game_event_handler.h"
 #include "utils.h"
 
-#define DEFAULT_SIM_SPEED_MS 101
-#define DEFAULT_CELLS_X 40
-#define DEFAULT_CELLS_Y DEFAULT_CELLS_X
-
 // SDL kezeléséhez használt dokumentáció: https://infoc.eet.bme.hu/sdl/
 
 // Időzítő, mely 20ms-enként generál egy SDL_USEREVENT-et.
@@ -46,7 +42,7 @@ Game init() {
     GameField *gameField = create_field(cells);
     Menu *menu = create_menu(menuArea, 0x7a7a7a77);
 
-    Game game = {renderer, window, windowArea, gameField, gridParams, menu, DEFAULT_SIM_SPEED_MS, false, false, .cursorPos.x = 0, .cursorPos.y = 0};
+    Game game = {renderer, window, windowArea, gameField, gridParams, menu, log(10) / log(SIM_SPEED_BASE), SIM_SPEED_MS, false, false, .cursorPos.x = 0, .cursorPos.y = 0};
     return game;
 }
 
@@ -112,13 +108,13 @@ void build_menu(Game *game) {
     add_element(game->menu, create_text_field(game->renderer, area, EDIT_FILE, create_string("palya.dat"), smallFont, textColor, tfColors));
 
     set_rect(90, 130, 70, 40, &area);
-    add_element(game->menu, create_text_field(game->renderer, area, EDIT_SPEED, parse_int(DEFAULT_SIM_SPEED_MS), smallFont, textColor, tfColors));
+    add_element(game->menu, create_text_field(game->renderer, area, EDIT_SPEED, int_to_string(10), smallFont, textColor, tfColors));
 
     set_rect(90, 520, 70, 40, &area);
-    add_element(game->menu, create_text_field(game->renderer, area, EDIT_CELLS_X, parse_int(DEFAULT_CELLS_X), smallFont, textColor, tfColors));
+    add_element(game->menu, create_text_field(game->renderer, area, EDIT_CELLS_X, int_to_string(DEFAULT_CELLS_X), smallFont, textColor, tfColors));
 
     set_rect(90, 605, 70, 40, &area);
-    add_element(game->menu, create_text_field(game->renderer, area, EDIT_CELLS_Y, parse_int(DEFAULT_CELLS_Y), smallFont, textColor, tfColors));
+    add_element(game->menu, create_text_field(game->renderer, area, EDIT_CELLS_Y, int_to_string(DEFAULT_CELLS_Y), smallFont, textColor, tfColors));
 }
 
 // Elindítja az időzítőket.

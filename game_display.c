@@ -1,6 +1,5 @@
 #include "game_display.h"
 #include "utils.h"
-#include "math.h"
 
 #define MIN_PADDING 10
 

@@ -4,7 +4,6 @@
 #include "game_display.h"
 #include "game_logic.h"
 #include "file_handling.h"
-#include "math.h"
 #include "utils.h"
 
 /**
@@ -56,6 +55,13 @@ void process_element_click(Game *game, SDL_Event *event, MenuElement *element) {
         case AUTO_STEP_TOGGLE:
             game->simRunning = !game->simRunning;
             edit_element_text(game->renderer, element, game->simRunning ? "Auto léptetés KI" : "Auto léptetés BE");
+            // játéktér méret szerkesztésének befejezése
+            if (game->menu->selTextField != NULL && (game->menu->selTextField->action == EDIT_CELLS_X || game->menu->selTextField->action == EDIT_CELLS_Y)) {
+                replace_text_field_text(game, EDIT_CELLS_X, int_to_string(game->gameField->size.x));
+                replace_text_field_text(game, EDIT_CELLS_Y, int_to_string(game->gameField->size.y));
+                game->menu->selTextField->selected = false;
+                game->menu->selTextField = NULL;
+            }
             break;
         case STEP:
             if (!game->simRunning)
@@ -74,25 +80,29 @@ void process_element_click(Game *game, SDL_Event *event, MenuElement *element) {
                 export_game(search_element(game->menu, EDIT_FILE)->text->text, game->gameField);
             break;
         case INC_SPEED:
-            game->simSpeedMs = (int) fmax(game->simSpeedMs - 10, 1);
-            replace_text_field_text(game, EDIT_SPEED, parse_int(game->simSpeedMs));
+            game->simSpeedExp = fmin(game->simSpeedExp + 1, ceil(log2(SIM_SPEED_MS / 2.0) / log2(SIM_SPEED_BASE)));
+            game->simSpeedMs = (int) fmax(SIM_SPEED_MS / pow(SIM_SPEED_BASE, game->simSpeedExp), 1);
+            printf("new speed: %d\n", game->simSpeedMs);
+            replace_text_field_text(game, EDIT_SPEED, double_to_string(pow(SIM_SPEED_BASE, game->simSpeedExp)));
             break;
         case DEC_SPEED:
-            game->simSpeedMs = (int) fmin(game->simSpeedMs + 10, 996);
-            replace_text_field_text(game, EDIT_SPEED, parse_int(game->simSpeedMs));
+            game->simSpeedExp = fmax(game->simSpeedExp - 1, floor(log2(SIM_SPEED_MS / 1000.0) / log2(SIM_SPEED_BASE)));
+            game->simSpeedMs = (int) fmax(SIM_SPEED_MS / pow(SIM_SPEED_BASE, game->simSpeedExp), 1);
+            printf("new speed: %d\n", game->simSpeedMs);
+            replace_text_field_text(game, EDIT_SPEED, double_to_string(pow(SIM_SPEED_BASE, game->simSpeedExp)));
             break;
         case INC_CELLS_X:
         case DEC_CELLS_X:
             if (!game->simRunning) {
                 resize_game(game, element->action);
-                replace_text_field_text(game, EDIT_CELLS_X, parse_int(game->gameField->size.x));
+                replace_text_field_text(game, EDIT_CELLS_X, int_to_string(game->gameField->size.x));
             }
             break;
         case INC_CELLS_Y:
         case DEC_CELLS_Y:
             if (!game->simRunning) {
                 resize_game(game, element->action);
-                replace_text_field_text(game, EDIT_CELLS_Y, parse_int(game->gameField->size.y));
+                replace_text_field_text(game, EDIT_CELLS_Y, int_to_string(game->gameField->size.y));
             }
             break;
         case EDIT_FILE:
@@ -159,14 +169,17 @@ void mouse_motion(Game *game, SDL_Event *event) {
 void process_value_edit(Game *game, MenuElement *textField) {
     switch (textField->action) {
         case EDIT_SPEED: {
-            int newSpeedMs = (int) strtol(textField->text->text, NULL, 10);
-            game->simSpeedMs = newSpeedMs;
+            double newSpeed = parse_double(textField->text->text);
+            game->simSpeedExp = fmin(log2(newSpeed) / log2(SIM_SPEED_BASE), ceil(log2(SIM_SPEED_MS / 2.0) / log2(SIM_SPEED_BASE)));
+            game->simSpeedMs = (int) fmax(SIM_SPEED_MS / pow(SIM_SPEED_BASE, game->simSpeedExp), 1);
+            replace_text_field_text(game, EDIT_SPEED, double_to_string(pow(SIM_SPEED_BASE, game->simSpeedExp)));
+            printf("new speed: %d\n", game->simSpeedMs);
             break;
         }
         case EDIT_CELLS_X:
         case EDIT_CELLS_Y: {
             Vector2s newSize = game->gameField->size;
-            short newSizeXY = (short) strtol(textField->text->text, NULL, 10);
+            short newSizeXY = (short) parse_int(textField->text->text);
             if (textField->action == EDIT_CELLS_X) newSize.x = newSizeXY;
             else newSize.y = newSizeXY;
             resize_field(game->gameField, newSize);
@@ -235,6 +248,7 @@ bool validate_input(MenuElement *textField, char *input) {
         case EDIT_FILE:
             return true;
         case EDIT_SPEED:
+            return (strcmp(input, "0") != 0 || strlen(textField->text->text) > 0) && strlen(textField->text->text) < 6 && only_numbers(input);
         case EDIT_CELLS_X:
         case EDIT_CELLS_Y:
             return strlen(textField->text->text) < 3 && only_numbers(input);

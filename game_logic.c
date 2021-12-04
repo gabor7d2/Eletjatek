@@ -1,5 +1,4 @@
 #include "game_logic.h"
-#include "math.h"
 
 void clear_cells(GameField *field) {
     if (field == NULL) return;
