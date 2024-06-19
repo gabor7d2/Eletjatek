@@ -35,7 +35,7 @@ Game init() {
     SDL_Window *window;
     SDL_Renderer *renderer;
     sdl_init(windowArea.w, windowArea.h, "Game Of Life", &window, &renderer);
-    SDL_SetWindowMinimumSize(window, 600, 600);
+    SDL_SetWindowMinimumSize(window, 800, 680);
     TTF_Init();
 
     GridParams *gridParams = create_grid_params(gameArea, cells, 0x212121ff, 0xffb300ff, 0x424242ff, 0xfff176ff);
